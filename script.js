@@ -466,6 +466,7 @@ window.shareKey = async function(key) {
 // ===== THEME TOGGLE =====
 window.toggleTheme = function() {
     const isLight = document.body.classList.toggle('light-theme');
+    document.documentElement.classList.toggle('light-theme', isLight);
     safeSet('ph_theme', isLight ? 'light' : 'dark');
     const icon = document.querySelector('#themeToggle i');
     if (icon) icon.className = isLight ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
@@ -584,6 +585,7 @@ setupOfflineDetection();
 const savedTheme = safeGet('ph_theme', 'dark');
 if (savedTheme === 'light') {
     document.body.classList.add('light-theme');
+    document.documentElement.classList.add('light-theme');
     document.addEventListener('DOMContentLoaded', () => {
         const icon = document.querySelector('#themeToggle i');
         if (icon) icon.className = 'fa-solid fa-moon';
