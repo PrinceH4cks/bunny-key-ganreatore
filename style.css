@@ -1,5 +1,5 @@
 ﻿/* =========================================
-   BUNNY USER PANEL â€” PREMIUM CSS (v3.0)
+   BUNNY USER PANEL — PREMIUM CSS (v3.0)
    Animated / Glassmorphism Edition
 ========================================= */
 
@@ -13,13 +13,27 @@
 
 :root {
     --bg-primary: #050510;
-    --bg-card: rgba(20, 20, 35, 0.6);
-    --bg-card-hover: rgba(30, 30, 50, 0.7);
+    --bg-card: rgba(255, 255, 255, 0.04);
+    --bg-card-hover: rgba(255, 255, 255, 0.07);
+    /* ===== FROSTED GLASS SYSTEM =====
+       1. backdrop-filter blur (pehle ka peechha background dhundhla karta hai)
+       2. halka glass tint
+       3. 1px glass border
+       4. soft shadow + inner top highlight */
+    --glass-tint: rgba(255, 255, 255, 0.05);
+    --glass-tint-hover: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-blur: 20px;
+    --glass-blur-sm: 10px;
+    --glass-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     --border-color: rgba(99, 102, 241, 0.3);
     --border-hover: rgba(99, 102, 241, 0.6);
     --text-primary: #ffffff;
     --text-secondary: #94a3b8;
     --text-muted: #64748b;
+    --text-faint: #475569;
+    --modal-bg: #141423;
+    --overlay-bg: rgba(0, 0, 0, 0.7);
     --accent: #818cf8;
     --accent-dark: #6366f1;
     --success: #34d399;
@@ -31,11 +45,13 @@
     --item-bg: rgba(0, 0, 0, 0.4);
     --item-border: rgba(255, 255, 255, 0.08);
     --toast-bg: rgba(16, 185, 129, 0.95);
-    --promo-bg: rgba(20, 20, 35, 0.7);
+    --promo-bg: rgba(255, 255, 255, 0.06);
     --shadow-glow: rgba(99, 102, 241, 0.15);
-    --orb-1: rgba(99, 102, 241, 0.42);
-    --orb-2: rgba(244, 114, 182, 0.3);
-    --orb-3: rgba(34, 211, 238, 0.28);
+    /* Portfolio jaisa: orbs bahut faint — colour wash se glass feel aata hai,
+       tez orbs se blur kuch nahi padta, sirf paisa dikhta hai */
+--orb-1: rgba(99, 102, 241, 0.22);
+    --orb-2: rgba(244, 114, 182, 0.16);
+    --orb-3: rgba(34, 211, 238, 0.14);
     --grid-line: rgba(99, 102, 241, 0.09);
 }
 
@@ -88,23 +104,187 @@ body.light-theme .shooting-star { display: none; }
 body.light-theme {
     background: transparent;
     --bg-primary: #eef1f8;
-    --bg-card: rgba(255, 255, 255, 0.88);
-    --bg-card-hover: rgba(255, 255, 255, 1);
+    --bg-card: rgba(255, 255, 255, 0.72);
+    --bg-card-hover: rgba(255, 255, 255, 0.85);
     --border-color: rgba(219, 138, 66, 0.28);
     --border-hover: rgba(219, 138, 66, 0.55);
     --text-primary: #292524;
     --text-secondary: #78716c;
     --text-muted: #a8a29e;
+    --text-faint: #a8a29e;
+    --modal-bg: #fffaf3;
+    --overlay-bg: rgba(60, 40, 25, 0.45);
     --item-bg: rgba(120, 83, 45, 0.06);
     --item-border: rgba(120, 83, 45, 0.14);
     --key-bg: rgba(255, 168, 58, 0.14);
     --key-border: rgba(219, 138, 66, 0.4);
     --shadow-glow: rgba(255, 168, 58, 0.2);
-    --promo-bg: rgba(255, 255, 255, 0.82);
+    --promo-bg: rgba(255, 255, 255, 0.75);
+    /* Light theme: header jaisa hi — rgba(255,255,255,0.75) + blur */
+    --glass-tint: rgba(255, 255, 255, 0.75);
+    --glass-tint-hover: rgba(255, 255, 255, 0.82);
     --orb-1: rgba(255, 168, 58, 0.4);
     --orb-2: rgba(244, 114, 182, 0.32);
     --orb-3: rgba(56, 160, 255, 0.3);
     --grid-line: rgba(180, 120, 60, 0.08);
+}
+
+/* =======================================================
+   SKELETON LOADING
+   Skeleton blocks REAL columns ke andar inject hote hain
+   (.col-main / .col-left / .col-right / .col-bottom / footer),
+   isliye layout apne aap real page jaisa rehta hai —
+   3-column grid bhi, stacked bhi. Koi breakpoint guess nahi.
+
+   Heights real CSS se measure kiye gaye hain:
+     hero 211 · dashboard card 230 · stats 91
+     How it Works 264 · Why BUNNY 396 · FAQ 323
+     promo+credit 114 · footer ~157
+   ======================================================= */
+
+/* asli content chhupi hai, DOM intact hai (JS refs safe) */
+body.is-loading .col-main > *:not(.skeleton),
+body.is-loading .col-left > *:not(.skeleton),
+body.is-loading .col-right > *:not(.skeleton),
+body.is-loading .col-bottom > *:not(.skeleton),
+body.is-loading .site-footer > *:not(.skeleton) {
+    display: none !important;
+}
+.skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    min-width: 0;
+}
+
+/* shimmer */
+.skeleton .sk-block,
+.skeleton .sk-stat {
+    background-image: linear-gradient(90deg,
+        #131c3a 0%, #131c3a 34%,
+        #1e2a52 50%,
+        #131c3a 66%, #131c3a 100%);
+    background-size: 800px 100%;
+    background-repeat: no-repeat;
+    border-radius: 8px;
+    animation: skShimmer 1.4s linear infinite;
+}
+body.light-theme .skeleton .sk-block,
+body.light-theme .skeleton .sk-stat {
+    background-image: linear-gradient(90deg,
+        #fff4e4 0%, #fff4e4 34%,
+        #fffaf1 50%,
+        #fff4e4 66%, #fff4e4 100%);
+}
+@keyframes skShimmer {
+    from { background-position: -400px 0; }
+    to   { background-position: 400px 0; }
+}
+
+/* shapes */
+.sk-line { height: 12px; width: 100%; }
+.sk-ring { width: 110px; height: 110px; border-radius: 50%; margin: 0 auto 8px; }
+
+/* hero 211px */
+.sk-hero {
+    height: 211px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0 6px;
+}
+
+/* card = real .card (padding 30/25, radius 22) */
+.sk-card {
+    background: linear-gradient(165deg, #1a2447 0%, #131c3a 48%, #0e1530 100%);
+    border: 1px solid rgba(150, 170, 255, 0.12);
+    border-radius: 22px;
+    padding: 30px 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+body.light-theme .sk-card {
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.97), rgba(255, 249, 238, 0.9));
+    border-color: rgba(219, 138, 66, 0.18);
+}
+
+/* section pill = real .section-title */
+.sk-pill { width: 120px; height: 22px; border-radius: 999px; margin: 0 auto 16px; }
+
+/* dashboard loader = real .loader-container (pad20 + spinner46) */
+.sk-loader-area {
+    height: 86px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.sk-spinner { width: 46px; height: 46px; border-radius: 50%; }
+
+/* stats = real .stat-card (pad 14/8) → 91px */
+.sk-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+.sk-stat {
+    height: 91px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 8px;
+    gap: 6px;
+}
+.sk-stat-i { width: 16px; height: 16px; border-radius: 4px; }
+.sk-stat-n { width: 44px; height: 20px; border-radius: 5px; }
+.sk-stat-l { width: 56px; height: 10px; border-radius: 4px; }
+
+/* How it Works = real .step-num 36px, gap 13/16 */
+.sk-steps {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.sk-step {
+    display: flex;
+    gap: 13px;
+    align-items: flex-start;
+    height: 36px;
+}
+.sk-step-num { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; }
+.sk-step-txt { flex: 1; padding-top: 3px; }
+.sk-step-txt .sk-line { border-radius: 4px; }
+
+/* Why BUNNY = real .feature (pad 13/12) → 84px */
+.sk-features {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+.sk-feature { height: 84px; border-radius: 14px; }
+
+/* FAQ = real .faq-item summary (pad 13/15) → 42px */
+.sk-faq {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.sk-faq-item { height: 42px; border-radius: 14px; }
+
+/* col-bottom */
+.sk-promo { width: 260px; height: 46px; border-radius: 50px; align-self: center; }
+.sk-credit { width: 170px; height: 34px; border-radius: 999px; align-self: center; }
+
+/* footer skeleton */
+.sk-foot-brand { width: 120px; height: 24px; border-radius: 6px; }
+.sk-foot-btn { width: 110px; height: 30px; border-radius: 999px; margin: 14px auto 0; }
+
+@media (prefers-reduced-motion: reduce) {
+    .skeleton .sk-block,
+    .skeleton .sk-stat { animation: none; }
 }
 
 * {
@@ -122,10 +302,23 @@ body.light-theme {
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
+/* =======================================================
+   CRITICAL — scroll container fix
+   body par `overflow-y: auto` + `overflow-x: hidden` tha.
+   Ye DONO body ko scroll container bana dete hain. Usse
+   position:fixed background layers aur backdrop-filter ka
+   coordinate space galat ho jata hai — Chrome backdrop ka
+   snapshot galat region se leta hai, jis se blur render hi
+   nahi hota (sirf flat transparent panel dikhta hai).
+
+   Fix: viewport par scroll karwao (body overflow visible),
+   horizontal clip html par `clip` se (wo scroll container
+   NAHI banata, `hidden` banata hai).
+   ======================================================= */
 html {
     overscroll-behavior: none;
     background: linear-gradient(160deg, #04040d 0%, #0a0a1f 55%, #150a24 100%);
-    background-attachment: fixed;
+    overflow-x: clip;
     transition: background 0.4s;
 }
 html.light-theme {
@@ -141,51 +334,56 @@ body {
     justify-content: center;
     align-items: flex-start;
     padding: 92px 20px 40px;
-    overflow-x: hidden;
-    overflow-y: auto;
+    /* overflow-y/overflow-x hataye — body scroll container banna
+       backdrop-filter ko break karta hai (upar dekho) */
     overscroll-behavior: none;
     transition: background 0.4s, color 0.4s;
     position: relative;
 }
 
 /* ===== ANIMATED BACKGROUND SCENE ===== */
+/* backdrop-filter ke liye zaroori: background ko content ke NEECHE
+   paint karwao, negative z-index par nahi. Kuch engines negative
+   z-index layers ko backdrop root se bahar maan dete hain, jisse
+   card ke andar blur nahi lagta — sirf flat tint dikhta hai.
+   contain: paint bhi hata diya (repaint cost + unnecessary clipping). */
 .bg-scene {
     position: fixed; inset: 0;
     overflow: hidden;
-    z-index: -2;
+    z-index: 0;
     pointer-events: none;
-    contain: paint;
 }
 .orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(90px);
+    filter: blur(100px);
     will-change: transform;
 }
 .orb-1 {
-    width: 420px; height: 420px;
+    width: 700px; height: 700px;
     background: var(--orb-1);
-    top: -120px; left: -120px;
+    top: -200px; left: -200px;
     animation: orbFloat1 16s ease-in-out infinite;
 }
 .orb-2 {
-    width: 360px; height: 360px;
+    width: 600px; height: 600px;
     background: var(--orb-2);
-    top: 35%; right: -140px;
+    bottom: -150px; right: -150px;
     animation: orbFloat2 20s ease-in-out infinite;
 }
 .orb-3 {
-    width: 320px; height: 320px;
+    width: 460px; height: 460px;
     background: var(--orb-3);
-    bottom: -100px; left: 15%;
+    top: 38%; left: 42%;
     animation: orbFloat3 18s ease-in-out infinite;
 }
 .orb-4 {
-    width: 240px; height: 240px;
+    width: 300px; height: 300px;
     background: rgba(250, 204, 21, 0.2);
-    top: 55%; left: -80px;
+    top: 60%; left: 8%;
     animation: orbFloat2 22s ease-in-out infinite reverse;
 }
+body.light-theme .orb { opacity: 0.55; }
 @keyframes orbFloat1 {
     0%, 100% { transform: translate(0, 0) scale(1); }
     33% { transform: translate(70px, 60px) scale(1.12); }
@@ -217,6 +415,13 @@ body {
     background-size: 44px 44px;
     animation: gridDrift 40s linear infinite;
     will-change: transform;
+}
+.noise {
+    position: absolute; inset: 0;
+    opacity: 0.045;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px;
+    pointer-events: none;
 }
 @keyframes gridDrift {
     from { transform: translate(0, 0); }
@@ -272,7 +477,7 @@ body.light-theme .s-moon::after {
 }
 @keyframes raySpin { to { transform: rotate(360deg); } }
 
-/* Sun ki roshni â€” beams + jahan pad rahi hai wahan ka warm pool */
+/* Sun ki roshni — beams + jahan pad rahi hai wahan ka warm pool */
 .sun-light {
     display: none;
     position: absolute;
@@ -297,15 +502,21 @@ body.light-theme .sun-light {
     to   { transform: rotate(1.8deg); opacity: 1; }
 }
 
-/* Light mode: warm soft shadows */
+/* Light mode: same frosted glass logic — blur + semi-transparent tint,
+   sirf dark ki jagah light tint (pehle ka background visible rahe) */
 body.light-theme .card {
-    background: linear-gradient(155deg, rgba(255, 255, 255, 0.97), rgba(255, 249, 238, 0.9));
-    box-shadow: 0 10px 30px rgba(180, 140, 90, 0.16), 0 0 20px var(--shadow-glow), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    background: rgba(255, 252, 245, 0.55);
+    border: 1px solid rgba(219, 138, 66, 0.22);
+    box-shadow: 0 12px 40px rgba(180, 140, 90, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 body.light-theme .card:hover {
-    box-shadow: 0 18px 42px rgba(180, 140, 90, 0.22), 0 0 30px var(--shadow-glow);
+    background: rgba(255, 252, 245, 0.64);
+    border-color: rgba(219, 138, 66, 0.34);
 }
 body.light-theme .site-header {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
     box-shadow: 0 10px 28px rgba(180, 140, 90, 0.14);
 }
 body.light-theme .promo-box {
@@ -325,18 +536,23 @@ body.light-theme .hero-logo {
 body.light-theme .sakura-top { opacity: 0.7; }
 body.light-theme .s-corner { opacity: 0.6; }
 body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
+/* SVG <defs> holder — must stay in the DOM and visible-ish for <use href="#..."> to resolve,
+   so it is clipped to 1px instead of being hidden off-screen. */
 .sakura-defs {
     position: fixed;
-    width: 0; height: 0;
+    top: 0; left: 0;
+    width: 1px; height: 1px;
     overflow: hidden;
-    z-index: -1;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
 }
 .sakura-sway {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 180px;
     pointer-events: none;
-    z-index: -1;
+    z-index: 1;
     transform-origin: top center;
     animation: sakuraSway 9s ease-in-out infinite;
     will-change: transform;
@@ -358,7 +574,7 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     width: min(380px, 50vw);
     height: 270px;
     opacity: 0.45;
-    z-index: -1;
+    z-index: 1;
     pointer-events: none;
 }
 .s-corner.tl { top: 0; left: 0; }
@@ -367,7 +583,7 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
 .petals {
     position: fixed;
     inset: 0;
-    z-index: -1;
+    z-index: 1;
     pointer-events: none;
 }
 .petal {
@@ -390,14 +606,26 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     .s-moon { width: 72px; height: 72px; top: 5%; right: 6%; }
 }
 
+/* Content sabse upar — background (z-index 0/1) se, taaki cards
+   ke peeche background paint ho aur backdrop-filter use kar sake */
 .container {
+    position: relative;
+    z-index: 2;
     width: 100%; max-width: 500px;
     display: flex; flex-direction: column; gap: 25px;
 }
 
-/* Staggered page entrance */
+/* Staggered page entrance
+   NOTE: opacity 0→1 wala animation backdrop-filter ko NAHI todta
+   (opacity sirf element khud par hai, parent par nahi), lekin
+   animation ke dauran blur briefly invisible dikhta hai — isliye
+   transform-only version use kar rahe hain. */
 .container > * {
     animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(26px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 .container > *:nth-child(1) { animation-delay: 0.05s; }
 .container > *:nth-child(2) { animation-delay: 0.15s; }
@@ -415,10 +643,6 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
 .container > *:nth-child(14) { animation-delay: 0.8s; }
 .container > *:nth-child(15) { animation-delay: 0.85s; }
 .container > *:nth-child(16) { animation-delay: 0.9s; }
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(26px); }
-    to { opacity: 1; transform: translateY(0); }
-}
 
 /* ===== HERO ===== */
 .hero {
@@ -516,11 +740,11 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     justify-content: space-between;
     gap: 12px;
     padding: 8px 14px;
-    background: var(--bg-card);
+    background: rgba(8, 8, 22, 0.55);
     border: 1px solid var(--item-border);
     border-radius: 16px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     will-change: transform;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
     animation: headerDrop 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -599,7 +823,6 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     display: flex; align-items: center; justify-content: center;
     font-size: 16px;
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s, box-shadow 0.3s;
-    backdrop-filter: blur(10px);
 }
 .icon-btn:hover {
     border-color: var(--border-hover);
@@ -662,26 +885,42 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     text-align: center;
     margin-bottom: 10px;
     animation: fadeInUp 0.5s ease both;
-    backdrop-filter: blur(8px);
 }
 
-/* ===== BASE CARD ===== */
+/* ===== BASE CARD — STRONG FROSTED GLASS (Level 1) =====
+
+   NOTE: isolation / filter / mask / opacity < 1 mat lagana — ye element
+   ko alag backdrop root bana dete hain aur backdrop-filter band ho jata
+   hai. Ye property PARENT par bhi na ho, warna card ka blur nahi lagega. */
 .card {
     position: relative;
-    background: var(--bg-card);
-    backdrop-filter: blur(14px);
-    border: 1px solid var(--border-color);
-    border-radius: 22px;
+
+    /* ── STRONG FROSTED GLASS (Level 1) ──
+       1. backdrop-filter: sirf card ke PEECHE ka background blur
+          karta hai. (filter: blur() mat lagao — wo card ke andar
+          ke text/icons ko bhi blur kar deta hai)
+       2. rgba(12,20,42,0.50): background ~50% visible rehta hai —
+          blur me, sharp nahi. Zyada alpha = zyada opaque.
+       3. subtle blue-tinted glass border + inner top highlight
+       4. soft shadow, neon glow NAHI (premium dark frosted look)
+
+       Tune karne ke liye: blur 24px–30px ke beech rakho.
+       28px zyada strong lagega, 24px subtler. */
+    background: rgba(12, 20, 42, 0.50);
+    border: 1px solid rgba(150, 170, 255, 0.14);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+    border-radius: 20px;
     padding: 30px 25px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), 0 0 20px var(--shadow-glow), inset 0 0 15px rgba(99, 102, 241, 0.05);
     text-align: center;
-    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s, border-color 0.4s;
     overflow: hidden;
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
 }
 .card:hover {
-    transform: translateY(-4px);
-    border-color: var(--border-hover);
-    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.35), 0 0 30px var(--shadow-glow);
+    background: rgba(12, 20, 42, 0.58);
+    border-color: rgba(150, 170, 255, 0.24);
+    box-shadow: 0 16px 46px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.13);
+    transform: translateY(-3px);
 }
 /* rotating conic border beam on hover */
 .card::before {
@@ -703,6 +942,13 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     opacity: 1;
     animation: beamSpin 2.8s linear infinite;
 }
+/* Engines without @property cannot interpolate --ang, so the beam is not shown */
+@supports not (background: conic-gradient(from var(--x, 0deg), red, blue)) {
+    .card:hover::before {
+        background: linear-gradient(135deg, var(--accent), #f472b6, var(--accent));
+        animation: none;
+    }
+}
 @keyframes beamSpin {
     to { --ang: 360deg; }
 }
@@ -720,20 +966,31 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
 .card:hover::after { left: 130%; }
 
 #maintenanceCard {
-    background: rgba(250, 204, 21, 0.05);
+    background: linear-gradient(160deg, rgba(250, 204, 21, 0.16), rgba(250, 204, 21, 0.05)), var(--glass-tint);
     border-color: rgba(250, 204, 21, 0.4);
     box-shadow: 0 0 25px rgba(250, 204, 21, 0.12);
     animation: fadeInUp 0.7s ease both, warnPulse 2.4s ease-in-out infinite 0.7s;
 }
 
 #errorCard {
-    background: rgba(239, 68, 68, 0.05);
+    background: linear-gradient(160deg, rgba(239, 68, 68, 0.16), rgba(239, 68, 68, 0.05)), var(--glass-tint);
     border-color: rgba(239, 68, 68, 0.4);
     box-shadow: 0 0 25px rgba(239, 68, 68, 0.12);
 }
 
 .float-icon { animation: logoFloat 3.5s ease-in-out infinite; display: block; }
 .shake-icon { animation: shake 0.7s ease infinite; }
+
+.alert-icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+    display: block;
+    text-align: center;
+}
+.alert-icon.warn { color: var(--warning); }
+.alert-icon.danger { color: var(--danger); }
+.alert-title { color: var(--text-primary); margin-bottom: 10px; text-align: center; font-size: 20px; }
+.alert-text { color: var(--text-secondary); font-size: 14px; text-align: center; }
 
 /* ===== TYPOGRAPHY ===== */
 .header-title {
@@ -748,8 +1005,31 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     50% { filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.7)); transform: rotate(-8deg); }
 }
 
-.section-title { font-size: 16px; font-weight: 500; color: var(--text-secondary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-.section-title i { color: var(--accent); }
+/* Section title — chhota centered pill box, ultra-compact text.
+   Key items left-aligned rehte hain (history-section text-align). */
+.section-title {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 auto 16px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--key-bg);
+    border: 1px solid var(--key-border);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    width: fit-content;
+}
+.section-title i {
+    font-size: 9px;
+    color: var(--accent);
+    opacity: 0.9;
+}
 
 /* ===== LOADER ===== */
 .loader-container {
@@ -782,6 +1062,9 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .typing-text { position: relative; }
+.loader-text { color: var(--text-secondary); font-size: 14px; margin-top: 10px; }
+.key-sub { color: var(--text-secondary); font-size: 12px; margin-bottom: 10px; }
+.gen-error { color: var(--danger); font-size: 14px; }
 
 /* ===== KEY GENERATION BOX ===== */
 .new-key-box {
@@ -894,7 +1177,6 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     padding: 16px;
     display: flex; flex-direction: column; gap: 12px;
     transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s, box-shadow 0.3s;
-    backdrop-filter: blur(6px);
 }
 .key-item:hover {
     transform: translateX(6px) scale(1.015);
@@ -965,7 +1247,7 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
 }
 
 /* ===== UTILITIES ===== */
-.empty-state { text-align: center; padding: 30px 10px; color: #475569; font-size: 14px; }
+.empty-state { text-align: center; padding: 30px 10px; color: var(--text-faint); font-size: 14px; }
 .empty-state i { font-size: 40px; margin-bottom: 12px; display: block; color: var(--accent); opacity: 0.7; }
 .bounce-icon { animation: bounceIcon 2s ease-in-out infinite; }
 @keyframes bounceIcon {
@@ -991,7 +1273,6 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     position: fixed; bottom: -100px; left: 50%;
     transform: translateX(-50%);
     background: var(--toast-bg);
-    backdrop-filter: blur(8px);
     color: white; padding: 13px 32px;
     border-radius: 50px; font-weight: 600; font-size: 14px;
     box-shadow: 0 10px 30px rgba(16, 185, 129, 0.45);
@@ -1143,13 +1424,13 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
 }
+.stat-card[data-empty="1"] .stat-num { color: var(--text-muted); }
 .stat-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
+    border: 1px solid var(--item-border);
+    border-radius: 14px;
     padding: 14px 8px;
     text-align: center;
-    backdrop-filter: blur(10px);
     transition: transform 0.3s, box-shadow 0.3s;
 }
 .stat-card:hover {
@@ -1346,7 +1627,6 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     background: var(--promo-bg);
     border: 1px solid var(--item-border);
     border-radius: 20px;
-    backdrop-filter: blur(12px);
 }
 .footer-brand {
     display: flex;
@@ -1406,7 +1686,6 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(6px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1436,14 +1715,13 @@ body.modal-open { overflow: hidden; }
 /* ===== HISTORY MODAL ===== */
 .history-modal {
     display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
+    background: var(--overlay-bg);
     z-index: 3000;
     justify-content: center; align-items: center;
     padding: 20px;
 }
 .history-modal-content {
-    background: #141423;
+    background: var(--modal-bg);
     border: 1px solid var(--border-color);
     border-radius: 22px;
     width: 100%; max-width: 450px;
@@ -1462,11 +1740,13 @@ body.modal-open { overflow: hidden; }
     padding: 20px 25px;
     border-bottom: 1px solid var(--item-border);
 }
+.history-modal-tools { display: flex; align-items: center; gap: 8px; }
 .history-modal-header h3 {
     font-size: 16px; font-weight: 600;
     display: flex; align-items: center; gap: 8px;
-    background: linear-gradient(135deg, #fff, #818cf8);
+    background: linear-gradient(135deg, var(--text-primary), var(--accent));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 .btn-clear {
     position: relative;
@@ -1518,6 +1798,72 @@ body.modal-open { overflow: hidden; }
 /* ===== OFFLINE BODY STATE ===== */
 body.offline .card { opacity: 0.7; pointer-events: none; }
 body.offline #offlineIndicator { display: flex; }
+body.offline .site-header,
+body.offline .promo-box,
+body.offline .promo-credit,
+body.offline .site-footer { pointer-events: auto; }
+
+/* Keyboard focus visibility (outline was removed globally) */
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+/* =======================================================
+   GLASS FALLBACK (purana block hata diya — naya @supports
+   not block file ke END me hai, L1900+, wahi chalega)
+   ======================================================= */
+
+/* =======================================================
+   MOBILE PERFORMANCE
+   Phone par scroll lag ka asli reason:
+   4 × filter:blur(100px) orbs continuously animate ho rahe
+   the, aur unke upar ~10 cards ka backdrop-filter. Har frame
+   par browser ko orbs dobara blur karke har card ka naya
+   snapshot lena padta tha.
+
+   Fix: blur BAND nahi kiya — glass look wahi chahiye thi.
+   Sirf background animations freeze kiye. Static background
+   par backdrop-filter ka result cache ho jaata hai, isliye
+   scroll smooth rehta hai aur effect intact rehta hai.
+   ======================================================= */
+@media (max-width: 768px) {
+    /* NOTE: blur values yahan NAHI badalti — wahi 26/20/18px rehte hain
+       jo desktop par (GLASS OVERRIDES block, file ke end me). Sirf
+       background animations freeze rehte hain taaki mobile par scroll
+       lag na aaye; glass effect bilkul same rehta hai. */
+
+    /* Asli performance fix: background freeze. Ek static background pe
+       backdrop-filter result cache ho jaata hai, scroll smooth rehta hai. */
+    .orb { animation: none !important; }
+    .bg-grid::before,
+    .stars,
+    .shooting-star { animation: none !important; }
+    .petal { animation-duration: 22s; }
+
+    /* conic border beam: @property ke bina gradient static rehta hai,
+       isliye mobile par hata dete hain (repaint cost bachega) */
+    .card::before { display: none; }
+}
+
+/* Sirf touch device par (bade screen par bhi touch ho to bhi) */
+@media (hover: none) and (pointer: coarse) {
+    .card::before { display: none; }
+}
+
+/* =======================================================
+   SCROLL PERFORMANCE
+   NOTE: body ka overflow + html ka background-attachment:fixed
+   dono pehle the — dono backdrop-filter ko break karte the.
+   Ab html rule ke upar scroll par hota hai aur html background
+   normal (scroll) paint hota hai. Fixed background ka kaam
+   .bg-scene (position:fixed) kar raha hai already.
+   ======================================================= */
+html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+}
 
 /* ===== REDUCED MOTION ===== */
 @media (prefers-reduced-motion: reduce) {
@@ -1527,6 +1873,171 @@ body.offline #offlineIndicator { display: flex; }
         transition-duration: 0.01ms !important;
     }
 }
+
+/* =======================================================
+   SOLID BOX SYSTEM  (file ke END me — taaki upar ke original
+   rules inhe override na kar sakein)
+
+   Sab cards/boxes AB SOLID (fully opaque) hain. Koi
+   transparency nahi, koi backdrop-filter nahi.
+
+   Isse har browser me identical dikhta hai — blur support
+   hone ya na hone se koi fark nahi padta, aur GPU bhi
+   free rehta hai (backdrop-filter bahut mehnga hota hai).
+
+   Hierarchy (teeno levels ka colour alag, depth banata hai):
+     Level 1 (bada)   .card               #101a33
+     Level 2 (medium) .stat-card, footer  #0e1729
+     Level 3 (chhota) .key-item, faq      #0c1424
+   ======================================================= */
+
+/* blur OFF — solid background hai, backdrop-filter ka koi
+   visual role nahi, sirf GPU kharcha.
+   NOTE: .site-header yahan JAANBUJH kar nahi hai — uska apna
+   rule upar L573 pe original values ke saath hai. */
+.card,
+.stat-card,
+.promo-box,
+.site-footer,
+.limits-info,
+.key-item,
+.faq-item,
+.feature,
+.new-key-box,
+.icon-btn {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+/* ----- Level 1: main cards -----
+   Top-lit gradient (upar halka, niche gehra) — flat hex se
+   premium depth lagta hai. Purple-indigo tint site ke
+   accent (#818cf8) se match karta hai. */
+.card {
+    background: linear-gradient(165deg, #1a2447 0%, #131c3a 48%, #0e1530 100%);
+    border: 1px solid rgba(150, 170, 255, 0.18);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5),
+                0 2px 8px rgba(0, 0, 0, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.09),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+.card:hover {
+    background: linear-gradient(165deg, #202c55 0%, #18234a 48%, #121a3a 100%);
+    border-color: rgba(160, 175, 255, 0.34);
+}
+
+/* ----- Level 2: medium containers ----- */
+.stat-card,
+.promo-box,
+.site-footer,
+.limits-info {
+    background: linear-gradient(165deg, #151e3c 0%, #111a33 55%, #0d1428 100%);
+    border: 1px solid rgba(150, 170, 255, 0.15);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+.stat-card:hover,
+.promo-box:hover {
+    background: linear-gradient(165deg, #1a2549 0%, #152040 55%, #101830 100%);
+    border-color: rgba(160, 175, 255, 0.28);
+}
+
+/* ----- Level 3: small items ----- */
+.key-item,
+.faq-item,
+.feature,
+.new-key-box {
+    background: linear-gradient(165deg, #121b36 0%, #0f172c 55%, #0b1222 100%);
+    border: 1px solid rgba(150, 170, 255, 0.13);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+.key-item:hover {
+    background: linear-gradient(165deg, #182345 0%, #131d3a 55%, #0e1730 100%);
+    border-color: rgba(160, 175, 255, 0.26);
+}
+.faq-item[open] {
+    background: linear-gradient(165deg, #16213f 0%, #121c38 55%, #0e1730 100%);
+    border-color: rgba(160, 175, 255, 0.24);
+}
+
+/* ----- Light theme: warm cream, top-lit ----- */
+body.light-theme .card {
+    background: linear-gradient(165deg, #fffefb 0%, #fffaf1 52%, #fdf1e0 100%);
+    border: 1px solid rgba(219, 138, 66, 0.26);
+    box-shadow: 0 14px 36px rgba(180, 140, 90, 0.2),
+                0 2px 6px rgba(180, 140, 90, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+body.light-theme .card:hover {
+    background: linear-gradient(165deg, #fffdf7 0%, #fff6e6 52%, #fdead4 100%);
+    border-color: rgba(219, 138, 66, 0.42);
+}
+body.light-theme .stat-card,
+body.light-theme .promo-box,
+body.light-theme .site-footer,
+body.light-theme .limits-info {
+    background: linear-gradient(165deg, #fffefa 0%, #fff8ec 55%, #fdf0de 100%);
+    border: 1px solid rgba(219, 138, 66, 0.22);
+    box-shadow: 0 10px 28px rgba(180, 140, 90, 0.16),
+                inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+body.light-theme .stat-card:hover,
+body.light-theme .promo-box:hover {
+    background: linear-gradient(165deg, #fffcf4 0%, #fff4e2 55%, #fcebd2 100%);
+    border-color: rgba(219, 138, 66, 0.36);
+}
+body.light-theme .key-item,
+body.light-theme .faq-item,
+body.light-theme .feature,
+body.light-theme .new-key-box {
+    background: linear-gradient(165deg, #fffcf6 0%, #fdf6e9 55%, #f9ecd9 100%);
+    border: 1px solid rgba(219, 138, 66, 0.2);
+    box-shadow: 0 6px 18px rgba(180, 140, 90, 0.13),
+                inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+body.light-theme .key-item:hover {
+    background: linear-gradient(165deg, #fffaf0 0%, #fdf2e0 55%, #f9e7d0 100%);
+    border-color: rgba(219, 138, 66, 0.32);
+}
+
+/* Alert cards: amber / red, opaque */
+#maintenanceCard {
+    background: linear-gradient(165deg, #33290a 0%, #2a2205 55%, #201a04 100%);
+    border-color: rgba(250, 204, 21, 0.45);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+#errorCard {
+    background: linear-gradient(165deg, #331010 0%, #2a0d0d 55%, #1f0909 100%);
+    border-color: rgba(239, 68, 68, 0.45);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+body.light-theme #maintenanceCard { background: linear-gradient(165deg, #fffae8 0%, #fff6d8 100%); border-color: rgba(217, 158, 15, 0.42); }
+body.light-theme #errorCard { background: linear-gradient(165deg, #fff0f0 0%, #ffe4e4 100%); border-color: rgba(220, 38, 38, 0.35); }
+
+/* Icon buttons / small controls */
+.icon-btn {
+    background: linear-gradient(165deg, #1c2748 0%, #16203c 100%);
+    border-color: rgba(150, 170, 255, 0.18);
+}
+body.light-theme .icon-btn {
+    background: linear-gradient(165deg, #fffaf0 0%, #fdf1de 100%);
+    border-color: rgba(219, 138, 66, 0.24);
+}
+
+/* Warning / info strips */
+.expiry-warning {
+    background: linear-gradient(165deg, #33290a 0%, #2a2205 100%);
+    border-color: rgba(250, 204, 21, 0.42);
+}
+body.light-theme .expiry-warning {
+    background: linear-gradient(165deg, #fffae8 0%, #fff6d8 100%);
+    border-color: rgba(217, 158, 15, 0.38);
+}
+
+/* Modals */
+.history-modal-content { background: linear-gradient(165deg, #1a2447 0%, #121a34 100%); }
+body.light-theme .history-modal-content { background: linear-gradient(165deg, #fffefb 0%, #fff7ea 100%); }
 
 @media (min-width: 1024px) {
     body { padding-top: 96px; }

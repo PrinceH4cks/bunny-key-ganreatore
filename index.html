@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#050510">
-    <title>BUNNY â€” Premium Key Generator</title>
+    <title>BUNNY &mdash; Premium Key Generator</title>
     <link rel="icon" href="logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="bg-scene" aria-hidden="true">
+<div class="bg-scene" aria-hidden="true">
         <div class="s-moon"></div>
         <div class="sun-light"></div>
         <div class="stars"></div>
@@ -22,6 +22,7 @@
         <div class="orb orb-3"></div>
         <div class="orb orb-4"></div>
         <div class="bg-grid"></div>
+        <div class="noise"></div>
     </div>
     <!-- Sakura SVG Definitions -->
 <svg class="sakura-defs" xmlns="http://www.w3.org/2000/svg">
@@ -145,15 +146,15 @@
         </header>
 
         <div class="card" id="maintenanceCard" style="display: none; border-color: #facc15;">
-            <i class="fa-solid fa-person-digging float-icon warn" style="font-size: 50px; color: #facc15; margin-bottom: 15px; display:block; text-align:center;"></i>
-            <h2 style="color: #fff; margin-bottom: 10px; text-align:center;">Maintenance Break</h2>
-            <p style="color: #94a3b8; font-size: 14px; text-align:center;">Server par update chal raha hai. Kripya kuch samay baad aayen.</p>
+            <i class="fa-solid fa-person-digging float-icon alert-icon warn"></i>
+            <h2 class="alert-title">Maintenance Break</h2>
+            <p class="alert-text">Server par update chal raha hai. Kripya kuch samay baad aayen.</p>
         </div>
 
         <div class="card" id="errorCard" style="display: none; border-color: #ef4444;">
-            <i class="fa-solid fa-server float-icon danger shake-icon" style="font-size: 50px; color: #ef4444; margin-bottom: 15px; display:block; text-align:center;"></i>
-            <h2 style="color: #fff; margin-bottom: 10px; text-align:center;">Servers Offline</h2>
-            <p style="color: #94a3b8; font-size: 14px; text-align:center;" id="errorMsg">Admin ne abhi tak koi database server connect nahi kiya hai.</p>
+            <i class="fa-solid fa-server float-icon shake-icon alert-icon danger"></i>
+            <h2 class="alert-title">Servers Offline</h2>
+            <p class="alert-text" id="errorMsg">Admin ne abhi tak koi database server connect nahi kiya hai.</p>
         </div>
 
         <div id="expiryWarning" class="expiry-warning" style="display: none;"></div>
@@ -164,7 +165,7 @@
             <div id="genLoader" class="loader-container">
                 <div class="spinner"></div>
                 <div class="spinner-dot"></div>
-                <p style="color: #94a3b8; font-size: 14px; margin-top: 10px;" class="typing-text">Connecting to Hub Servers...</p>
+                <p class="typing-text loader-text">Connecting to Hub Servers...</p>
             </div>
 
             <div id="genResult" class="new-key-box" style="display: none;">
@@ -174,7 +175,7 @@
                 <div class="header-title" style="margin-bottom: 5px;" id="genTitle">
                     <i class="fa-solid fa-bolt" style="color: #fbbf24;"></i> Key Generated!
                 </div>
-                <p style="color: #94a3b8; font-size: 12px; margin-bottom: 10px;" id="genDesc">Valid for the next 24 Hours</p>
+                <p class="key-sub" id="genDesc">Valid for the next 24 Hours</p>
 
                 <div class="key-display" id="newKeyValue">BUNNY-XXXXXX</div>
 
@@ -215,12 +216,12 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <i class="fa-solid fa-key"></i>
-                <div class="stat-num" data-count="12500">0</div>
+                <div class="stat-num" id="statKeys" data-count="12500">0</div>
                 <div class="stat-label">Keys Generated</div>
             </div>
             <div class="stat-card">
                 <i class="fa-solid fa-users"></i>
-                <div class="stat-num" data-count="52000">0</div>
+                <div class="stat-num" id="statUsers" data-count="52000">0</div>
                 <div class="stat-label">Happy Users</div>
             </div>
             <div class="stat-card">
@@ -348,13 +349,13 @@
 
     <div class="toast" id="toast"><i class="fa-solid fa-check"></i> Copied!</div>
 
-    <div class="dev-modal" id="devModal" aria-hidden="true">
+    <div class="dev-modal" id="devModal" role="dialog" aria-modal="true" aria-labelledby="devTitle" aria-hidden="true">
         <div class="dev-modal-content">
             <div class="card dev-card">
-                <button class="icon-btn dev-close" onclick="closeDevModal()" title="Close">
+                <button class="icon-btn dev-close" onclick="closeDevModal()" title="Close" aria-label="Close">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
-                <div class="header-title"><i class="fa-solid fa-code" style="color: #f472b6;"></i> Developer Contact</div>
+                <div class="header-title" id="devTitle"><i class="fa-solid fa-code" style="color: #f472b6;"></i> Developer Contact</div>
                 <p class="dev-sub">I build &amp; sell websites, apps &amp; panels. DM me to order.</p>
                 <div class="dev-actions">
                     <a class="dev-btn whatsapp" href="https://wa.me/917488739325" target="_blank" rel="noopener">
@@ -369,13 +370,13 @@
         </div>
     </div>
 
-    <div class="history-modal" id="historyModal">
+    <div class="history-modal" id="historyModal" role="dialog" aria-modal="true" aria-labelledby="historyTitle" aria-hidden="true">
         <div class="history-modal-content">
             <div class="history-modal-header">
-                <h3><i class="fa-solid fa-clock-rotate-left"></i> All Generated Keys</h3>
-                <div style="display: flex; align-items: center; gap: 8px;">
+                <h3 id="historyTitle"><i class="fa-solid fa-clock-rotate-left"></i> All Generated Keys</h3>
+                <div class="history-modal-tools">
                     <button class="btn-clear" onclick="clearKeyHistory()" title="Clear Expired Keys Only"><i class="fa-solid fa-trash-can"></i> Clear</button>
-                    <button class="icon-btn" onclick="closeHistoryModal()"><i class="fa-solid fa-xmark"></i></button>
+                    <button class="icon-btn" onclick="closeHistoryModal()" title="Close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </div>
             <div class="history-modal-body" id="historyList"></div>
@@ -466,10 +467,9 @@
             setTimeout(() => span.remove(), 650);
         });
 
-        // ===== STATS COUNT-UP =====
-        document.querySelectorAll('.stat-num').forEach(function (el) {
-            var target = parseInt(el.getAttribute('data-count'), 10);
-            if (!target) return;
+        // ===== STATS COUNT-UP (values pushed from Firebase SystemStats) =====
+        window.animateStat = function (el, target) {
+            if (!el || typeof target !== 'number' || !isFinite(target) || target <= 0) return;
             var final = target.toLocaleString('en-US');
             if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
                 el.textContent = final;
@@ -482,7 +482,145 @@
                 if (p < 1) requestAnimationFrame(tick);
                 else el.textContent = final;
             })(start);
+        };
+
+        // Page load par data-count se count-up chalao (fallback numbers).
+        // Firebase se real value aane par woh upar se override kar leti hai.
+        document.querySelectorAll('.stat-num[data-count]').forEach(function (el) {
+            var n = parseInt(el.getAttribute('data-count'), 10);
+            if (n) window.animateStat(el, n);
         });
+
+        // ===== SKELETON LOADING =====
+// Skeleton ko REAL columns ke andar inject karte hain (col-main,
+// col-left, col-right, col-bottom, footer). Isliye layout apne aap
+// real page jaisa rehta hai — 3-column grid bhi, stacked bhi —
+// bina koi breakpoint guess kiye.
+window.__skBuilt = false;
+window.__skNodes = [];
+
+window.buildSkeleton = function () {
+    if (window.__skBuilt) return;
+    const q = (s) => document.querySelector(s);
+    const main = q('.col-main'), left = q('.col-left'), right = q('.col-right'),
+          bottom = q('.col-bottom'), footer = q('.site-footer');
+    if (!main) return;
+    window.__skBuilt = true;
+
+    // real content chhupa do (DOM intact rehta hai — JS refs safe)
+    document.body.classList.add('is-loading');
+
+    const mk = (html) => {
+        const d = document.createElement('div');
+        d.className = 'skeleton';
+        d.innerHTML = html;
+        return d;
+    };
+
+    const hero = `
+        <div class="sk-hero">
+          <div class="sk-block sk-ring"></div>
+          <div class="sk-block sk-line" style="width:190px;height:38px;border-radius:6px"></div>
+          <div class="sk-block sk-line" style="width:128px;height:13px"></div>
+        </div>`;
+
+    const dash = `
+        <div class="sk-card">
+          <div class="sk-block sk-line" style="width:150px;height:26px;margin:0 auto 20px"></div>
+          <div class="sk-block sk-pill"></div>
+          <div class="sk-loader-area"><div class="sk-block sk-spinner"></div></div>
+        </div>`;
+
+    const stat = `
+        <div class="sk-stat">
+          <div class="sk-block sk-stat-i"></div>
+          <div class="sk-block sk-stat-n"></div>
+          <div class="sk-block sk-stat-l"></div>
+        </div>`;
+    const stats = `<div class="sk-stats">${stat}${stat}${stat}</div>`;
+
+    const steps = [1, 2, 3].map(() => `
+        <div class="sk-step">
+          <div class="sk-block sk-step-num"></div>
+          <div class="sk-step-txt">
+            <div class="sk-block sk-line" style="width:55%;height:14px"></div>
+            <div class="sk-block sk-line" style="width:80%;height:12px;margin-top:2px"></div>
+          </div>
+        </div>`).join('');
+    const howCard = `
+        <div class="sk-card">
+          <div class="sk-block sk-line" style="width:130px;height:26px;margin:0 auto 20px"></div>
+          <div class="sk-steps">${steps}</div>
+        </div>`;
+
+    const feat = `<div class="sk-block sk-feature"></div>`;
+    const whyCard = `
+        <div class="sk-card">
+          <div class="sk-block sk-line" style="width:150px;height:26px;margin:0 auto 20px"></div>
+          <div class="sk-features">${feat.repeat(6)}</div>
+        </div>`;
+
+    const faqRow = `<div class="sk-block sk-faq-item"></div>`;
+    const faqCard = `
+        <div class="sk-card">
+          <div class="sk-block sk-line" style="width:90px;height:26px;margin:0 auto 20px"></div>
+          <div class="sk-faq">${faqRow.repeat(4)}</div>
+        </div>`;
+
+    const bottomSk = `
+        <div class="sk-block sk-promo"></div>
+        <div class="sk-block sk-credit"></div>`;
+
+    const footSk = `
+        <div class="sk-block sk-foot-brand"></div>
+        <div class="sk-block sk-line" style="width:180px;height:11px;margin:6px auto 0"></div>
+        <div class="sk-block sk-foot-btn"></div>
+        <div class="sk-block sk-line" style="width:150px;height:10px;margin:12px auto 0"></div>`;
+
+    const push = (host, html) => {
+        if (!host) return;
+        const n = mk(html);
+        host.insertBefore(n, host.firstChild);
+        window.__skNodes.push(n);
+    };
+
+    push(main, hero + dash + stats);
+    push(left, howCard + whyCard);
+    push(right, faqCard);
+    push(bottom, bottomSk);
+    push(footer, footSk);
+
+    // footer skeleton ko flex column banana padta hai
+    const f = footer.querySelector('.skeleton');
+    if (f) { f.classList.add('sk-footer'); f.style.height = 'auto'; }
+};
+
+window.hideSkeleton = function () {
+    if (!window.__skBuilt) {
+        // Firebase init se pehle hi chali gayi ho — backdrop hata do
+        document.body.classList.remove('is-loading');
+        return;
+    }
+    window.__skNodes.forEach(n => n.remove());
+    window.__skNodes = [];
+    window.__skBuilt = false;
+    document.body.classList.remove('is-loading');
+    // container ke fadeInUp animations dobara chalein (ab asli content dikhega)
+    document.querySelectorAll('.container > *').forEach(el => {
+        el.style.animation = 'none';
+        void el.offsetWidth;
+        el.style.animation = '';
+    });
+};
+
+// build turant (script body ke end par hai, DOM ready hai)
+window.buildSkeleton();
+
+// Firebase ready hote hi — content render ho chuka hota hai
+window.addEventListener('bunny:ready', window.hideSkeleton);
+window.addEventListener('load', function () { setTimeout(window.hideSkeleton, 600); });
+// safety net — kabhi stuck na rahe
+setTimeout(window.hideSkeleton, 7000);
 
         // ===== DEV CONTACT MODAL =====
         var devScrollTop = 0;
@@ -505,9 +643,12 @@
         };
         document.addEventListener('click', function (e) {
             if (e.target.classList && e.target.classList.contains('dev-modal')) window.closeDevModal();
+            if (e.target.classList && e.target.classList.contains('history-modal')) window.closeHistoryModal();
         });
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') window.closeDevModal();
+            if (e.key !== 'Escape') return;
+            window.closeDevModal();
+            window.closeHistoryModal();
         });
 
         window.addEventListener('resize', function () {

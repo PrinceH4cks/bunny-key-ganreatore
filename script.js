@@ -90,7 +90,10 @@ activeUnsubscribers.push(
 function triggerSystemInit() {
     if(isSettingsLoaded && isHubLoaded && !initFired) {
         initFired = true;
+        setupStatsListener();
         checkAccessAndRun();
+        // Content ab render ho chuka hai — skeleton hata do
+        window.dispatchEvent(new Event('bunny:ready'));
     }
 }
 
@@ -103,6 +106,22 @@ function updateLimitsDisplay() {
     const used = genTimestamps.length;
     el.innerHTML = `<i class="fa-solid fa-circle-info"></i> Limit: <strong>${mk}</strong> keys / <strong>${cd}h</strong> cooldown | Used: <strong>${used}/${mk}</strong>`;
     el.style.display = 'block';
+}
+
+// ===== STATS DISPLAY =====
+function setupStatsListener() {
+    activeUnsubscribers.push(
+        onValue(ref(db, 'SystemStats/totalLifetimeGenerated'), (snapshot) => {
+            const n = snapshot.val();
+            if (typeof n === 'number') window.animateStat(document.getElementById('statKeys'), n);
+        })
+    );
+    activeUnsubscribers.push(
+        onValue(ref(db, 'SystemStats/happyUsers'), (snapshot) => {
+            const n = snapshot.val();
+            if (typeof n === 'number') window.animateStat(document.getElementById('statUsers'), n);
+        })
+    );
 }
 
 // ===== ACCESS CONTROL =====
@@ -261,7 +280,7 @@ async function createAndRegisterKey() {
         if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
         setupRealtimeSync(); 
     } catch (err) {
-        document.getElementById('genLoader').innerHTML = '<p style="color:#ef4444;">Server error! Kripya baad me try karein.</p>';
+        document.getElementById('genLoader').innerHTML = '<p class="gen-error">Server error! Kripya baad me try karein.</p>';
     }
 }
 
@@ -448,9 +467,9 @@ window.copyText = function(text) {
     });
 };
 
-function showToast(msg = 'Copied!') {
+function showToast(msg = 'Copied!', icon = 'fa-check') {
     const toast = document.getElementById('toast');
-    toast.innerHTML = `<i class="fa-solid fa-check"></i> ${msg}`;
+    toast.innerHTML = `<i class="fa-solid ${icon}"></i> ${msg}`;
     toast.classList.add('show'); 
     setTimeout(() => toast.classList.remove('show'), 2500);
 }
@@ -473,32 +492,26 @@ window.toggleTheme = function() {
 };
 
 // ===== KEY HISTORY (for all generated keys) =====
+let historyScrollTop = 0;
 window.showKeyHistory = function() {
     const modal = document.getElementById('historyModal');
-    const list = document.getElementById('historyList');
-    if (!modal || !list) return;
-    list.innerHTML = '';
-    if (allGeneratedKeys.length === 0) {
-        list.innerHTML = '<div class="empty-state">No keys generated yet</div>';
-    } else {
-        allGeneratedKeys.slice().reverse().forEach(item => {
-            const isActive = userKeysArray.includes(item.key);
-            const div = document.createElement('div');
-            div.className = 'history-item';
-            div.innerHTML = `
-                <div class="history-key">${item.key}</div>
-                <div class="history-meta">${item.type} | ${item.duration === 99999 ? 'Lifetime' : item.duration + 'h'} | ${isActive ? 'Active' : 'Inactive'}</div>
-            `;
-            div.onclick = () => copyText(item.key);
-            list.appendChild(div);
-        });
-    }
+    if (!modal) return;
+    renderHistoryList();
+    historyScrollTop = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    document.body.classList.add('modal-open');
     modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden', 'false');
+    const close = modal.querySelector('.icon-btn');
+    if (close) close.focus();
 };
 
 window.closeHistoryModal = function() {
     const modal = document.getElementById('historyModal');
-    if (modal) modal.style.display = 'none';
+    if (!modal || modal.style.display !== 'flex') return;
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+    window.scrollTo(0, historyScrollTop);
 };
 
 // ===== CLEAR ONLY EXPIRED KEYS (Device Cache) =====
@@ -544,7 +557,7 @@ window.clearKeyHistory = function() {
 
     const cleared = beforeCount - (allGeneratedKeys.length + userKeysArray.length);
     if (cleared === 0) {
-        showToast('No expired keys found');
+        showToast('No expired keys found', 'fa-circle-info');
         return;
     }
     if (!confirm(`Clear ${cleared} EXPIRED key${cleared > 1 ? 's' : ''}? Active & Lifetime keys will remain.`)) return;
@@ -572,7 +585,7 @@ window.clearKeyHistory = function() {
 
     renderHistoryList();
     updateLimitsDisplay();
-    showToast(`${cleared} expired key${cleared > 1 ? 's' : ''} cleared!`);
+    showToast(`${cleared} expired key${cleared > 1 ? 's' : ''} cleared!`, 'fa-broom');
 };
 
 // ===== CLEANUP =====
