@@ -190,7 +190,7 @@ async function createAndRegisterKey() {
     const defaultDuration = sysSettings.defaultKeyDuration || 24;
     const defaultTier = sysSettings.defaultKeyTier || 'normal';
     const isVip = defaultTier === 'vip';
-    const prefix = isVip ? 'VIP-' : 'MC-';
+    const prefix = isVip ? 'VIP-' : 'Bunny-';
     const newKey = prefix + generateShortKey();
     
     let duration = sysSettings.defaultKeyLifetime ? 99999 : defaultDuration;
