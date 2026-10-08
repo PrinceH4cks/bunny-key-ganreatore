@@ -595,12 +595,12 @@ window.addEventListener('beforeunload', () => {
 
 // ===== INIT =====
 setupOfflineDetection();
+// Theme already <head> ke inline script me lag chuka hai (first paint se
+// pehle). Yahan sirf body par class sync karta hai aur icon set karta hai.
 const savedTheme = safeGet('ph_theme', 'dark');
 if (savedTheme === 'light') {
     document.body.classList.add('light-theme');
     document.documentElement.classList.add('light-theme');
-    document.addEventListener('DOMContentLoaded', () => {
-        const icon = document.querySelector('#themeToggle i');
-        if (icon) icon.className = 'fa-solid fa-moon';
-    });
+    const themeIcon = document.querySelector('#themeToggle i');
+    if (themeIcon) themeIcon.className = 'fa-solid fa-moon';
 }

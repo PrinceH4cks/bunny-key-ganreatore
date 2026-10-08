@@ -8,6 +8,27 @@
     <link rel="icon" href="logo.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <script>
+        // ===== THEME — FIRST PAINT SE PEHLE =====
+        // Pehle ye script.js (module, deferred) me tha jo body paint
+        // hone ke BAAD chalta tha. Light-theme user ko pehle dark
+        // dikhta tha, phir light — scroll karte waqt flash hota tha.
+        // Ab head me synchronous chalta hai: paint se pehle hi class
+        // laga deta hai, koi flash nahi hoga.
+        (function () {
+            try {
+                if (JSON.parse(localStorage.getItem('ph_theme')) === 'light') {
+                    document.documentElement.classList.add('light-theme', 'theme-boot');
+                }
+            } catch (e) {}
+            // paint settle hone dena, phir transitions wapas on
+            window.addEventListener('load', function () {
+                requestAnimationFrame(function () {
+                    document.documentElement.classList.remove('theme-boot');
+                });
+            });
+        })();
+    </script>
 </head>
 <body>
 
@@ -498,9 +519,13 @@
 // bina koi breakpoint guess kiye.
 window.__skBuilt = false;
 window.__skNodes = [];
+window.__skHidden = false;
 
 window.buildSkeleton = function () {
-    if (window.__skBuilt) return;
+    // Sirf ek hi baar — scroll, resize, ya kisi bhi event se dobara
+    // kabhi build nahi hoga. Poora page ek saath load hota hai,
+    // per-section lazy loading KABHI nahi hoti.
+    if (window.__skBuilt || window.__skHidden) return;
     const q = (s) => document.querySelector(s);
     const main = q('.col-main'), left = q('.col-left'), right = q('.col-right'),
           bottom = q('.col-bottom'), footer = q('.site-footer');
@@ -596,11 +621,12 @@ window.buildSkeleton = function () {
 };
 
 window.hideSkeleton = function () {
-    if (!window.__skBuilt) {
-        // Firebase init se pehle hi chali gayi ho — backdrop hata do
-        document.body.classList.remove('is-loading');
-        return;
-    }
+    // Idempotent — Firebase event, load event aur timeout teeno call
+    // kar sakte hain, sirf pehli baar kaam karega. Scroll se kabhi
+    // dobara call nahi hota.
+    if (window.__skHidden) return;
+    window.__skHidden = true;
+
     window.__skNodes.forEach(n => n.remove());
     window.__skNodes = [];
     window.__skBuilt = false;
@@ -621,6 +647,15 @@ window.addEventListener('bunny:ready', window.hideSkeleton);
 window.addEventListener('load', function () { setTimeout(window.hideSkeleton, 600); });
 // safety net — kabhi stuck na rahe
 setTimeout(window.hideSkeleton, 7000);
+
+// ===== OFFLINE CACHE =====
+// Pehli visit par poori page cache ho jati hai. Agli visit par
+// service worker cache se serve karta hai — offline bhi chalta hai.
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function () {});
+    });
+}
 
         // ===== DEV CONTACT MODAL =====
         var devScrollTop = 0;

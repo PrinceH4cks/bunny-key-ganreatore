@@ -101,8 +101,11 @@
 body.light-theme .stars,
 body.light-theme .shooting-star { display: none; }
 
+/* Light theme vars — html par bhi, taaki head wale inline script
+   paint se pehle class laga de to turant light dikhe (no flash).
+   body.light-theme wali values identical hain — dono ek hi kaam karte hain. */
+html.light-theme,
 body.light-theme {
-    background: transparent;
     --bg-primary: #eef1f8;
     --bg-card: rgba(255, 255, 255, 0.72);
     --bg-card-hover: rgba(255, 255, 255, 0.85);
@@ -127,6 +130,19 @@ body.light-theme {
     --orb-2: rgba(244, 114, 182, 0.32);
     --orb-3: rgba(56, 160, 255, 0.3);
     --grid-line: rgba(180, 120, 60, 0.08);
+}
+html.light-theme body { background: transparent; }
+
+/* Boot phase: first paint tak transition mat chalao, warna theme
+   switch animate hokar flash ban jata hai. theme-boot class
+   load hone ke baad hat jata hai. */
+html.theme-boot,
+html.theme-boot body,
+html.theme-boot .card,
+html.theme-boot .site-header,
+html.theme-boot .stat-card,
+html.theme-boot .key-item {
+    transition: none !important;
 }
 
 /* =======================================================
@@ -922,32 +938,29 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     box-shadow: 0 16px 46px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.13);
     transform: translateY(-3px);
 }
-/* rotating conic border beam on hover */
+/* Hover border beam — `border-image` se gradient border, mask ke bina.
+   PEHLE `mask` + `mask-composite: exclude` + @property --ang animation
+   tha. Mobile Safari me ye mask scroll ke dauran poora card vanish
+   karwa deta tha. border-image wahi gradient deta hai, par koi mask
+   nahi — har browser me stable. */
 .card::before {
     content: '';
     position: absolute;
-    inset: -1px;
-    border-radius: 23px;
-    padding: 1.5px;
-    background: conic-gradient(from var(--ang), transparent 0 68%, var(--accent) 82%, #f472b6 90%, transparent 100%);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    mask-composite: exclude;
+    inset: 0;
+    border-radius: 22px;
+    border: 1.5px solid transparent;
+    border-image: linear-gradient(135deg, var(--accent), #f472b6, var(--accent)) 1;
     opacity: 0;
-    transition: opacity 0.4s;
+    transition: opacity 0.35s ease;
     pointer-events: none;
 }
 .card:hover::before {
     opacity: 1;
-    animation: beamSpin 2.8s linear infinite;
+    animation: skBeamFade 2.4s ease-in-out infinite alternate;
 }
-/* Engines without @property cannot interpolate --ang, so the beam is not shown */
-@supports not (background: conic-gradient(from var(--x, 0deg), red, blue)) {
-    .card:hover::before {
-        background: linear-gradient(135deg, var(--accent), #f472b6, var(--accent));
-        animation: none;
-    }
+@keyframes skBeamFade {
+    from { opacity: 0.45; }
+    to   { opacity: 1; }
 }
 @keyframes beamSpin {
     to { --ang: 360deg; }
@@ -1829,27 +1842,78 @@ body.offline .site-footer { pointer-events: auto; }
    scroll smooth rehta hai aur effect intact rehta hai.
    ======================================================= */
 @media (max-width: 768px) {
-    /* NOTE: blur values yahan NAHI badalti — wahi 26/20/18px rehte hain
-       jo desktop par (GLASS OVERRIDES block, file ke end me). Sirf
-       background animations freeze rehte hain taaki mobile par scroll
-       lag na aaye; glass effect bilkul same rehta hai. */
+    /* ---------- MOBILE PERF ----------
+       Do asli wajah the:
+       1) 4 orbs par `filter: blur(100px)` — 700/600/460/300px ke
+          blobs har scroll par dobara rasterize hote the.
+       2) 12 jagah `will-change: transform` — itne saare composited
+          layers mobile GPU pe memory pressure banate hain, aur
+          layer evict hone par element BLINK karke gayab ho jata
+          tha (yahi "card gayab ho jata hai" wala bug tha).
 
-    /* Asli performance fix: background freeze. Ek static background pe
-       backdrop-filter result cache ho jaata hai, scroll smooth rehta hai. */
-    .orb { animation: none !important; }
+       Fix: blur hata kar pre-soft radial-gradient (same look, zero
+       filter cost), aur mobile par will-change hata diya. */
+
+    /* orbs — radial-gradient, no filter */
+    .orb {
+        filter: none !important;
+        will-change: auto;
+        background-color: transparent !important;
+        background-image: radial-gradient(circle closest-side,
+            currentColor 0%, currentColor 30%, transparent 72%);
+        color: var(--orb-1);
+        opacity: 0.75;
+    }
+    .orb-1 { top: -180px; left: -180px; }
+    .orb-2 { bottom: -150px; right: -150px; color: var(--orb-2); }
+    .orb-3 { top: 38%; left: 42%; color: var(--orb-3); }
+    .orb-4 { display: none; }
+
+    /* background animations freeze — static backdrop scroll smooth rakhta hai */
     .bg-grid::before,
     .stars,
     .shooting-star { animation: none !important; }
-    .petal { animation-duration: 22s; }
+    .petal { animation-duration: 26s; }
 
-    /* conic border beam: @property ke bina gradient static rehta hai,
-       isliye mobile par hata dete hain (repaint cost bachega) */
+    /* will-change hatao — mobile pe layer explosion + vanish bug */
+    .site-header,
+    .sakura-sway,
+    .promo-box,
+    .promo-hand,
+    .ring-pulse,
+    .timeline-item,
+    .timer-box { will-change: auto !important; }
+
+    /* bade box-shadow mobile par mehnga paint dete hain — chhota kardo */
+    .card {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+    .stat-card,
+    .promo-box,
+    .site-footer,
+    .limits-info {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    .key-item,
+    .faq-item,
+    .feature {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    /* sakura SVG par drop-shadow filter — bada SVG, mehnga */
+    .sakura-top { filter: none; }
+
+    /* hover beam mobile par nahi chahiye (no hover on touch) */
     .card::before { display: none; }
+
+    /* sakura sway bhi freeze — fixed + rotate = repaint */
+    .sakura-sway { animation: none; }
 }
 
 /* Sirf touch device par (bade screen par bhi touch ho to bhi) */
 @media (hover: none) and (pointer: coarse) {
     .card::before { display: none; }
+    .orb { filter: none !important; will-change: auto; }
 }
 
 /* =======================================================
