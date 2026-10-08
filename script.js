@@ -230,29 +230,67 @@ async function createAndRegisterKey() {
     };
 
     try {
-        let successCount = 0;
-        for(let extDb of externalDbs) {
-            try { await set(ref(extDb, 'ActiveUserKeys/' + newKey), kData); successCount++; }
-            catch(err) { console.error("Ext DB Sync Error:", err); }
-        }
+        /* -------------------------------------------------------------
+           UI TURANT dikhao — network ka wait mat karo.
+           Pehle poora loop (saare mirror DBs + custom paths ke
+           `await set()`) pehle chalta tha, aur tab jaake confetti
+           aata tha. 2-3 mirror DBs par 2-3 seconds lag tha.
+           Ab: key + confetti + vibrate turant, writes background me.
+           ------------------------------------------------------------- */
+        const showResult = () => {
+            document.getElementById('newKeyValue').innerText = newKey;
+            document.getElementById('newKeyValue').style.display = 'block';
 
-        // Write to custom key paths in all external DBs
-        const customPaths = sysSettings.customKeyPaths || [];
-        for (const customPath of customPaths) {
+            const descEl = document.getElementById('genDesc');
+            if (isLifetime) descEl.innerText = 'Valid for Lifetime (Never Expires)';
+            else if (duration >= 24 && duration % 24 === 0) {
+                const days = duration / 24;
+                descEl.innerText = `Valid for the next ${days} Day${days > 1 ? 's' : ''}`;
+            } else descEl.innerText = `Valid for the next ${duration} Hour${duration > 1 ? 's' : ''}`;
+
+            document.getElementById('genLoader').style.display = 'none';
+            document.getElementById('genResult').style.display = 'block';
+            document.getElementById('shareBtn').style.display = 'inline-flex';
+            if (window.launchConfetti) window.launchConfetti();
+            if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+        };
+
+        // ---- writes background me (UI block na ho) ----
+        (async () => {
+            let successCount = 0;
             for (let extDb of externalDbs) {
-                await set(ref(extDb, customPath + '/' + newKey), kData).catch(err => console.error("Custom path sync:", err));
+                try { await set(ref(extDb, 'ActiveUserKeys/' + newKey), kData); successCount++; }
+                catch (err) { console.error("Ext DB Sync Error:", err); }
             }
-        }
 
-        if(successCount === 0 && customPaths.length === 0) throw new Error("All servers failed");
+            const customPaths = sysSettings.customKeyPaths || [];
+            for (const customPath of customPaths) {
+                for (let extDb of externalDbs) {
+                    await set(ref(extDb, customPath + '/' + newKey), kData)
+                        .catch(err => console.error("Custom path sync:", err));
+                }
+            }
 
-        try {
-            set(ref(db, 'SystemStats/totalLifetimeGenerated'), increment(1)).catch(()=>{});
-            const d = new Date();
-            const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-            set(ref(db, `SystemStats/DailyGenerations/${ds}`), increment(1)).catch(()=>{});
-        } catch(e) {}
+            const allFailed = successCount === 0 && customPaths.length === 0;
+            if (allFailed) {
+                // UI ban chuka hai, par key kahin save nahi hui — bata do
+                showToast('Key save nahi hui — server error', 'fa-triangle-exclamation');
+            }
 
+            // dashboard ko refresh karo (asli data aa gaya)
+            if (!allFailed) {
+                userKeysArray.push(newKey);
+                if (userKeysArray.length > sysSettings.maxKeysLimit * 2) userKeysArray.shift();
+                safeSet('ph_dashboard_keys', userKeysArray);
+                userKeysArray.forEach(k => {
+                    activeUnsubscribers.push(
+                        onValue(ref(externalDbs[0], 'ActiveUserKeys/' + k), () => renderDashboardUI())
+                    );
+                });
+            }
+        })();
+
+        // ---- local cache + UI turant ----
         if (!userKeysArray.includes(newKey)) {
             userKeysArray.push(newKey);
             if (userKeysArray.length > sysSettings.maxKeysLimit * 2) userKeysArray.shift();
@@ -263,22 +301,15 @@ async function createAndRegisterKey() {
             safeSet('ph_all_keys', allGeneratedKeys);
         }
 
-        document.getElementById('newKeyValue').innerText = newKey;
-        document.getElementById('newKeyValue').style.display = 'block';
-        
-        const descEl = document.getElementById('genDesc');
-        if (isLifetime) descEl.innerText = 'Valid for Lifetime (Never Expires)';
-        else if (duration >= 24 && duration % 24 === 0) {
-            const days = duration / 24;
-            descEl.innerText = `Valid for the next ${days} Day${days > 1 ? 's' : ''}`;
-        } else descEl.innerText = `Valid for the next ${duration} Hour${duration > 1 ? 's' : ''}`;
-        
-        document.getElementById('genLoader').style.display = 'none';
-        document.getElementById('genResult').style.display = 'block';
-        document.getElementById('shareBtn').style.display = 'inline-flex';
-        if (window.launchConfetti) window.launchConfetti();
-        if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
-        setupRealtimeSync(); 
+        try {
+            set(ref(db, 'SystemStats/totalLifetimeGenerated'), increment(1)).catch(() => {});
+            const d = new Date();
+            const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            set(ref(db, `SystemStats/DailyGenerations/${ds}`), increment(1)).catch(() => {});
+        } catch (e) {}
+
+        showResult();
+        setupRealtimeSync();
     } catch (err) {
         document.getElementById('genLoader').innerHTML = '<p class="gen-error">Server error! Kripya baad me try karein.</p>';
     }

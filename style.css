@@ -49,9 +49,12 @@
     --shadow-glow: rgba(99, 102, 241, 0.15);
     /* Portfolio jaisa: orbs bahut faint — colour wash se glass feel aata hai,
        tez orbs se blur kuch nahi padta, sirf paisa dikhta hai */
---orb-1: rgba(99, 102, 241, 0.22);
-    --orb-2: rgba(244, 114, 182, 0.16);
-    --orb-3: rgba(34, 211, 238, 0.14);
+/* Simplified palette — sirf 2 hues (indigo + pink). Cyan/gold
+       hata diye taaki background cluttered na lage.
+       Pink sakura/petals se bhi match karta hai. */
+--orb-1: rgba(99, 102, 241, 0.24);
+    --orb-2: rgba(244, 114, 182, 0.18);
+    --orb-3: rgba(99, 102, 241, 0.12);
     --grid-line: rgba(99, 102, 241, 0.09);
 }
 
@@ -126,9 +129,10 @@ body.light-theme {
     /* Light theme: header jaisa hi — rgba(255,255,255,0.75) + blur */
     --glass-tint: rgba(255, 255, 255, 0.75);
     --glass-tint-hover: rgba(255, 255, 255, 0.82);
-    --orb-1: rgba(255, 168, 58, 0.4);
-    --orb-2: rgba(244, 114, 182, 0.32);
-    --orb-3: rgba(56, 160, 255, 0.3);
+    /* Light theme — simple: sirf 2 hues (sun amber + sakura pink) */
+    --orb-1: rgba(255, 168, 58, 0.34);
+    --orb-2: rgba(244, 114, 182, 0.26);
+    --orb-3: rgba(255, 168, 58, 0.16);
     --grid-line: rgba(180, 120, 60, 0.08);
 }
 html.light-theme body { background: transparent; }
@@ -143,164 +147,6 @@ html.theme-boot .site-header,
 html.theme-boot .stat-card,
 html.theme-boot .key-item {
     transition: none !important;
-}
-
-/* =======================================================
-   SKELETON LOADING
-   Skeleton blocks REAL columns ke andar inject hote hain
-   (.col-main / .col-left / .col-right / .col-bottom / footer),
-   isliye layout apne aap real page jaisa rehta hai —
-   3-column grid bhi, stacked bhi. Koi breakpoint guess nahi.
-
-   Heights real CSS se measure kiye gaye hain:
-     hero 211 · dashboard card 230 · stats 91
-     How it Works 264 · Why BUNNY 396 · FAQ 323
-     promo+credit 114 · footer ~157
-   ======================================================= */
-
-/* asli content chhupi hai, DOM intact hai (JS refs safe) */
-body.is-loading .col-main > *:not(.skeleton),
-body.is-loading .col-left > *:not(.skeleton),
-body.is-loading .col-right > *:not(.skeleton),
-body.is-loading .col-bottom > *:not(.skeleton),
-body.is-loading .site-footer > *:not(.skeleton) {
-    display: none !important;
-}
-.skeleton {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    min-width: 0;
-}
-
-/* shimmer */
-.skeleton .sk-block,
-.skeleton .sk-stat {
-    background-image: linear-gradient(90deg,
-        #131c3a 0%, #131c3a 34%,
-        #1e2a52 50%,
-        #131c3a 66%, #131c3a 100%);
-    background-size: 800px 100%;
-    background-repeat: no-repeat;
-    border-radius: 8px;
-    animation: skShimmer 1.4s linear infinite;
-}
-body.light-theme .skeleton .sk-block,
-body.light-theme .skeleton .sk-stat {
-    background-image: linear-gradient(90deg,
-        #fff4e4 0%, #fff4e4 34%,
-        #fffaf1 50%,
-        #fff4e4 66%, #fff4e4 100%);
-}
-@keyframes skShimmer {
-    from { background-position: -400px 0; }
-    to   { background-position: 400px 0; }
-}
-
-/* shapes */
-.sk-line { height: 12px; width: 100%; }
-.sk-ring { width: 110px; height: 110px; border-radius: 50%; margin: 0 auto 8px; }
-
-/* hero 211px */
-.sk-hero {
-    height: 211px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 0 6px;
-}
-
-/* card = real .card (padding 30/25, radius 22) */
-.sk-card {
-    background: linear-gradient(165deg, #1a2447 0%, #131c3a 48%, #0e1530 100%);
-    border: 1px solid rgba(150, 170, 255, 0.12);
-    border-radius: 22px;
-    padding: 30px 25px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-body.light-theme .sk-card {
-    background: linear-gradient(155deg, rgba(255, 255, 255, 0.97), rgba(255, 249, 238, 0.9));
-    border-color: rgba(219, 138, 66, 0.18);
-}
-
-/* section pill = real .section-title */
-.sk-pill { width: 120px; height: 22px; border-radius: 999px; margin: 0 auto 16px; }
-
-/* dashboard loader = real .loader-container (pad20 + spinner46) */
-.sk-loader-area {
-    height: 86px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.sk-spinner { width: 46px; height: 46px; border-radius: 50%; }
-
-/* stats = real .stat-card (pad 14/8) → 91px */
-.sk-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-}
-.sk-stat {
-    height: 91px;
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 14px 8px;
-    gap: 6px;
-}
-.sk-stat-i { width: 16px; height: 16px; border-radius: 4px; }
-.sk-stat-n { width: 44px; height: 20px; border-radius: 5px; }
-.sk-stat-l { width: 56px; height: 10px; border-radius: 4px; }
-
-/* How it Works = real .step-num 36px, gap 13/16 */
-.sk-steps {
-    margin-top: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-.sk-step {
-    display: flex;
-    gap: 13px;
-    align-items: flex-start;
-    height: 36px;
-}
-.sk-step-num { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; }
-.sk-step-txt { flex: 1; padding-top: 3px; }
-.sk-step-txt .sk-line { border-radius: 4px; }
-
-/* Why BUNNY = real .feature (pad 13/12) → 84px */
-.sk-features {
-    margin-top: 18px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-}
-.sk-feature { height: 84px; border-radius: 14px; }
-
-/* FAQ = real .faq-item summary (pad 13/15) → 42px */
-.sk-faq {
-    margin-top: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.sk-faq-item { height: 42px; border-radius: 14px; }
-
-/* col-bottom */
-.sk-promo { width: 260px; height: 46px; border-radius: 50px; align-self: center; }
-.sk-credit { width: 170px; height: 34px; border-radius: 999px; align-self: center; }
-
-/* footer skeleton */
-.sk-foot-brand { width: 120px; height: 24px; border-radius: 6px; }
-.sk-foot-btn { width: 110px; height: 30px; border-radius: 999px; margin: 14px auto 0; }
-
-@media (prefers-reduced-motion: reduce) {
-    .skeleton .sk-block,
-    .skeleton .sk-stat { animation: none; }
 }
 
 * {
@@ -336,6 +182,11 @@ html {
     background: linear-gradient(160deg, #04040d 0%, #0a0a1f 55%, #150a24 100%);
     overflow-x: clip;
     transition: background 0.4s;
+    /* Mobile browsers ka "font boosting" text ko scroll par inflate
+       kar deta hai — isliye header/text ka size "bada-chhota" lagta
+       tha. 100% se font boosting off. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 html.light-theme {
     background: linear-gradient(125deg, #ffe8c2 0%, #ffdde9 42%, #cbe7ff 100%);
@@ -393,12 +244,8 @@ body {
     top: 38%; left: 42%;
     animation: orbFloat3 18s ease-in-out infinite;
 }
-.orb-4 {
-    width: 300px; height: 300px;
-    background: rgba(250, 204, 21, 0.2);
-    top: 60%; left: 8%;
-    animation: orbFloat2 22s ease-in-out infinite reverse;
-}
+/* Gold orb REMOVED — 4 hue ki jagah 2 (indigo + pink). Bas ek extra
+   soft glow chahiye to orb-3 halka indigo rakha hai. */
 body.light-theme .orb { opacity: 0.55; }
 @keyframes orbFloat1 {
     0%, 100% { transform: translate(0, 0) scale(1); }
@@ -414,24 +261,9 @@ body.light-theme .orb { opacity: 0.55; }
     40% { transform: translate(90px, -50px) scale(1.08); }
     75% { transform: translate(-40px, -90px) scale(0.95); }
 }
-.bg-grid {
-    position: absolute; inset: 0;
-    overflow: hidden;
-    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-}
-.bg-grid::before {
-    content: '';
-    position: absolute;
-    top: -44px; left: -44px;
-    width: calc(100% + 88px); height: calc(100% + 88px);
-    background-image:
-        linear-gradient(var(--grid-line) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-    background-size: 44px 44px;
-    animation: gridDrift 40s linear infinite;
-    will-change: transform;
-}
+/* Grid lines REMOVED — background me line-line nahi chahiye thi.
+   Sirf soft orbs + chand/suraj + sakura + patte rahenge. */
+.bg-grid { display: none; }
 .noise {
     position: absolute; inset: 0;
     opacity: 0.045;
@@ -573,6 +405,14 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     animation: sakuraSway 9s ease-in-out infinite;
     will-change: transform;
 }
+/* Rotation hataya — 0.5deg ka rotate 1900px wide element par ~17px
+   edge displacement deta tha, jo "bada-chhota hota hua" dikhta tha.
+   Ab sirf vertical shift — size bilkul nahi badalta, movement feel
+   bahi rehti hai. */
+@keyframes sakuraSway {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-4px); }
+}
 .sakura-top {
     position: absolute;
     top: 0; left: 0;
@@ -580,10 +420,6 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     opacity: 0.5;
     pointer-events: none;
     filter: drop-shadow(0 0 18px rgba(255, 158, 196, 0.15));
-}
-@keyframes sakuraSway {
-    0%, 100% { transform: rotate(-0.4deg); }
-    50% { transform: rotate(0.5deg); }
 }
 .s-corner {
     position: fixed;
@@ -1699,7 +1535,7 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.7);
-    display: flex;
+    display: none;                 /* band hone par poori screen render hi na ho */
     align-items: center;
     justify-content: center;
     padding: 20px;
@@ -1709,7 +1545,7 @@ body.light-theme .petal { filter: saturate(1.7) brightness(0.96); }
     transition: opacity 0.3s, visibility 0.3s;
 }
 body.modal-open { overflow: hidden; }
-.dev-modal.open { opacity: 1; visibility: visible; }
+.dev-modal.open { display: flex; opacity: 1; visibility: visible; }
 .dev-modal-content {
     position: relative;
     width: 100%;
@@ -1869,8 +1705,8 @@ body.offline .site-footer { pointer-events: auto; }
     .orb-3 { top: 38%; left: 42%; color: var(--orb-3); }
     .orb-4 { display: none; }
 
-    /* background animations freeze — static backdrop scroll smooth rakhta hai */
-    .bg-grid::before,
+    /* background animations freeze — static backdrop scroll smooth rakhta hai.
+       .bg-grid DOM se hata diya gaya hai, isliye wo list me nahi hai. */
     .stars,
     .shooting-star { animation: none !important; }
     .petal { animation-duration: 26s; }
@@ -2120,4 +1956,369 @@ body.light-theme .history-modal-content { background: linear-gradient(165deg, #f
     .col-bottom { grid-column: 2; grid-row: 2; }
     .col-left .card:last-child, .col-right .card:last-child { position: sticky; top: 96px; }
     .site-footer { grid-column: 1 / -1; }
+}
+
+
+/* =======================================================
+   MOBILE LITE MODE  (ye block file ke END me hai, isliye
+   upar ke rules isse override nahi kar sakte)
+
+   Phone par FPS ~2-3 ho gaya tha. Asli wajah FILTER aur MASK
+   the — GPU par inhe rasterize karna mehnga hai:
+
+     - feTurbulence (noise)     → har repaint par dobara paint
+     - drop-shadow filter        → har frame par re-render
+     - full-viewport mask-image  → raster cost
+
+   Ye teen BAND rahein gi (filters/masks). Background ko
+   KHALI nahi chhoda — wapas laaya, lekin SASTE tareeke se:
+
+     - noise ki jagah halka vignette gradient (gradient paint
+       sasta hai, filter nahi)
+     - grid par mask hata kar plain gradient lines
+     - orbs pe radial-gradient (blur filter ki jagah)
+     - transform-only animations CHALU (GPU composite karta
+       hai, repaint nahi karta — saste hain)
+
+   Isliye background dikhta bhi hai aur scroll smooth bhi.
+   ======================================================= */
+@media (max-width: 768px) {
+
+    /* ---------- FILTER / MASK: band (sabse mehnga) ---------- */
+    .noise { display: none; }
+    .hero-grad { filter: none; }
+    .key-display {
+        filter: none;
+        animation: keyPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+    }
+    .sakura-top { filter: none; }
+    .header-title i { filter: none; animation: none; }
+
+    /* ---------- HEADER ka backdrop-filter ----------
+       Ye fixed + full-width element hai, isliye mobile par har
+       scroll frame par browser poore peeche ka region blur
+       karke snapshot leta hai. Akela ye FPS 3-4 se smooth kar
+       deta hai. Design almost same rehta hai — background
+       rgba(8,8,22,0.55) hai, sirf glass effect halka hoga. */
+    .site-header,
+    .site-header .icon-btn {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    /* ---------- light theme: har petal ka filter ----------
+       6 falling petals × filter = 6 raster layers. Colors halke
+       ho jayenge, effect same rahega. */
+    body.light-theme .petal { filter: none; }
+
+    /* grid poori tarah hata diya (upar wale rule me display:none) */
+
+    /* ---------- BACKGROUND WAPAS: saste transform animations ---------- */
+    /* orbs — blur(100px) ke bajaye radial-gradient, par drift CHALU.
+       transform-only animation GPU pe composite hoti hai (sasta). */
+    .orb {
+        filter: none !important;
+        will-change: auto;
+        background-color: transparent !important;
+        background-image: radial-gradient(circle closest-side,
+            currentColor 0%, currentColor 30%, transparent 72%);
+        color: var(--orb-1);
+        opacity: 0.8;
+        animation-duration: 26s;
+    }
+    .orb-1 { top: -180px; left: -180px; }
+    .orb-2 { bottom: -150px; right: -150px; color: var(--orb-2); }
+    .orb-3 { top: 38%; left: 42%; color: var(--orb-3); animation-duration: 30s; }
+
+    /* stars — opacity animation, dheere (transform-only chalti hai) */
+    .stars { animation-duration: 8s; }
+    .shooting-star { animation-duration: 14s; }
+
+    /* moon — box-shadow ANIMATION mehnga hai, static shadow rakho.
+           moon dikhta rahega, bas glow pulse nahi karega. */
+    .s-moon { animation: none; }
+
+    /* sakura sway — rotate transform, sasta, chalu rakho */
+    .sakura-sway { animation-duration: 12s; }
+
+    /* corner sakura wapas (SVG hai, koi filter nahi) */
+    .s-corner { display: block; opacity: 0.32; }
+
+    /* vignette — noise ki jagah. gradient paint sasta hai. */
+    .bg-scene::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(ellipse at 50% 40%,
+            transparent 40%, rgba(2, 2, 8, 0.55) 100%);
+    }
+
+    /* ---------- petals: kam par chalti rahein ---------- */
+    .petals { position: absolute; }
+    .petal { animation-duration: 34s; will-change: auto; }
+
+    /* ---------- chhote blinks: 2x slow (repaint frequency ghat) ---------- */
+    .timer-box { animation-duration: 2.4s; }
+    .badge::before,
+    .live-dot,
+    .hero-sub .live-dot { animation-duration: 2.4s; }
+    .ring-pulse { animation-duration: 4s; }
+
+/* ---------- promo box: animations WAPAS ----------
+   Ye galti se band kar diye the. Ye sab transform/opacity
+   based hain (GPU pe composite hoti hain, repaint nahi karti),
+   isliye mobile par bhi saste hain — inhe chalti rehni chahiye. */
+.promo-box { animation: promoNudge 5s cubic-bezier(0.34, 1.56, 0.64, 1) infinite; }
+.promo-box::before { animation: promoShine 5s ease-in-out infinite; }
+.promo-box::after { animation: promoWave 5s ease-out infinite; }
+.promo-hand { animation: handWag 1.4s ease-in-out infinite; }
+    #maintenanceCard { animation: fadeInUp 0.7s ease both; }
+    .spinner-dot { display: none; }
+    .faq-icon { transition: none; }
+
+    /* hover shadows — mobile pe zaroorat nahi */
+    .card,
+    .stat-card,
+    .key-item,
+    .feature,
+    .faq-item { transition: transform 0.2s ease; }
+    .card::before { display: none; }
+}
+   /* =======================================================
+   SKELETON LOADING
+   Skeleton blocks REAL columns ke andar inject hote hain
+   (.col-main / .col-left / .col-right / .col-bottom / footer),
+   isliye layout apne aap real page jaisa rehta hai —
+   3-column grid bhi, stacked bhi. Koi breakpoint guess nahi.
+
+   Heights real CSS se measure kiye gaye hain:
+     hero 211 · dashboard card 230 · stats 91
+     How it Works 264 · Why BUNNY 396 · FAQ 323
+     promo+credit 114 · footer ~157
+   ======================================================= */
+
+/* asli content chhupi hai, DOM intact hai (JS refs safe) */
+body.is-loading .col-main > *:not(.skeleton),
+body.is-loading .col-left > *:not(.skeleton),
+body.is-loading .col-right > *:not(.skeleton),
+body.is-loading .col-bottom > *:not(.skeleton),
+body.is-loading .site-footer > *:not(.skeleton) {
+    display: none !important;
+}
+.skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    min-width: 0;
+}
+
+/* shimmer */
+.skeleton .sk-block,
+.skeleton .sk-stat {
+    background-image: linear-gradient(90deg,
+        #131c3a 0%, #131c3a 34%,
+        #1e2a52 50%,
+        #131c3a 66%, #131c3a 100%);
+    background-size: 800px 100%;
+    background-repeat: no-repeat;
+    border-radius: 8px;
+    animation: skShimmer 1.4s linear infinite;
+}
+body.light-theme .skeleton .sk-block,
+body.light-theme .skeleton .sk-stat {
+    background-image: linear-gradient(90deg,
+        #fff4e4 0%, #fff4e4 34%,
+        #fffaf1 50%,
+        #fff4e4 66%, #fff4e4 100%);
+}
+@keyframes skShimmer {
+    from { background-position: -400px 0; }
+    to   { background-position: 400px 0; }
+}
+
+/* shapes */
+.sk-line { height: 12px; width: 100%; }
+.sk-ring { width: 110px; height: 110px; border-radius: 50%; margin: 0 auto 8px; }
+
+/* hero 211px */
+.sk-hero {
+    height: 211px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0 6px;
+}
+
+/* card = real .card (padding 30/25, radius 22) */
+.sk-card {
+    background: linear-gradient(165deg, #1a2447 0%, #131c3a 48%, #0e1530 100%);
+    border: 1px solid rgba(150, 170, 255, 0.12);
+    border-radius: 22px;
+    padding: 30px 25px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+body.light-theme .sk-card {
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.97), rgba(255, 249, 238, 0.9));
+    border-color: rgba(219, 138, 66, 0.18);
+}
+
+/* section pill = real .section-title */
+.sk-pill { width: 120px; height: 22px; border-radius: 999px; margin: 0 auto 16px; }
+
+/* dashboard loader = real .loader-container (pad20 + spinner46) */
+.sk-loader-area {
+    height: 86px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.sk-spinner { width: 46px; height: 46px; border-radius: 50%; }
+
+/* stats = real .stat-card (pad 14/8) → 91px */
+.sk-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+.sk-stat {
+    height: 91px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 8px;
+    gap: 6px;
+}
+.sk-stat-i { width: 16px; height: 16px; border-radius: 4px; }
+.sk-stat-n { width: 44px; height: 20px; border-radius: 5px; }
+.sk-stat-l { width: 56px; height: 10px; border-radius: 4px; }
+
+/* How it Works = real .step-num 36px, gap 13/16 */
+.sk-steps {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.sk-step {
+    display: flex;
+    gap: 13px;
+    align-items: flex-start;
+    height: 36px;
+}
+.sk-step-num { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; }
+.sk-step-txt { flex: 1; padding-top: 3px; }
+.sk-step-txt .sk-line { border-radius: 4px; }
+
+/* Why BUNNY = real .feature (pad 13/12) → 84px */
+.sk-features {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+.sk-feature { height: 84px; border-radius: 14px; }
+
+/* FAQ = real .faq-item summary (pad 13/15) → 42px */
+.sk-faq {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.sk-faq-item { height: 42px; border-radius: 14px; }
+
+/* col-bottom */
+.sk-promo { width: 260px; height: 46px; border-radius: 50px; align-self: center; }
+.sk-credit { width: 170px; height: 34px; border-radius: 999px; align-self: center; }
+
+/* footer skeleton */
+.sk-foot-brand { width: 120px; height: 24px; border-radius: 6px; }
+.sk-foot-btn { width: 110px; height: 30px; border-radius: 999px; margin: 14px auto 0; }
+
+/* =======================================================
+   JITTER FIX
+   Ye teen cheezein "bada-chhota hota hua" feel karwa rahi thin:
+
+   1) .sakura-sway rotate ho raha tha (top center origin, 100% width).
+      0.5deg ka rotate ~1900px wide element par 17px edge shift
+      deta hai — size badla hua dikhta tha. Ab sirf translateY.
+
+   2) .site-header par `will-change: transform` PERMANENTLY pada
+      tha. Fixed element GPU layer me atak gaya rehta hai aur
+      kuch browsers me alag scale par render hota hai — header
+      "bada-chhota" dikhta tha. Entrance animation khatam hone
+      ke baad will-change hatana chahiye, warna har frame layer
+      hold karta hai.
+
+   3) html par text-size-adjust missing tha — mobile browsers ka
+      font boosting scroll par text inflate karta hai.
+
+   Ye rules MOBILE LITE MODE block ke end me hain, isliye
+   upar ke original header rule ko chhede bina override hote hain.
+   ======================================================= */
+
+/* header ka will-change — sirf entrance ke dauran chahiye.
+   Ye ALL devices par (desktop bhi) — fixed+will-change wala
+   element har browser me alag scale par render ho sakta hai.
+   Header ka apna rule bilkul nahi chheda, sirf override. */
+.site-header { will-change: auto; }
+
+/* ---------- MOBILE ONLY: pulse animations band ---------- */
+@media (max-width: 768px) {
+    /* sun/moon ki glow — box-shadow animation har frame repaint
+       karti hai. Static shadow: moon/sun dikhega, pulse nahi. */
+    .s-moon,
+    body.light-theme .s-moon { animation: none; }
+
+    /* logo ring ka scale(0.92→1.28) — "bada" feel deta hai.
+       Subtle static gradient ring. */
+    .ring-pulse {
+        animation: none;
+        background: radial-gradient(circle,
+            transparent 58%, rgba(129, 140, 248, 0.16) 62%,
+            rgba(129, 140, 248, 0.06) 70%, transparent 76%);
+        border-color: rgba(129, 140, 248, 0.35);
+    }
+}
+
+/* ---------- PROGRESS BAR ----------
+   Skeleton ke neeche slim progress bar + status text.
+   Bar 90% tak smoothly chalta hai, phin Firebase ready hone
+   par 100% ho jata hai — user ko pata chalta hai ki load
+   chal raha hai, page hang nahi hai. */
+.skeleton.sk-progress { gap: 10px; }
+.sk-progress-track {
+    width: 100%;
+    height: 4px;
+    border-radius: 4px;
+    overflow: hidden;
+    animation: none !important;
+    background: rgba(129, 140, 248, 0.16) !important;
+    background-image: none !important;
+}
+.sk-progress-fill {
+    display: block;
+    height: 100%;
+    width: 0%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #818cf8, #f472b6, #fbbf24);
+    transition: width 0.18s linear;
+}
+body.light-theme .sk-progress-track {
+    background: rgba(219, 138, 66, 0.2) !important;
+}
+.sk-progress-text {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+@media (prefers-reduced-motion: reduce) {
+    .skeleton .sk-block,
+    .skeleton .sk-stat { animation: none; }
 }

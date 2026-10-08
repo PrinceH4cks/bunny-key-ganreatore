@@ -41,9 +41,6 @@
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
         <div class="orb orb-3"></div>
-        <div class="orb orb-4"></div>
-        <div class="bg-grid"></div>
-        <div class="noise"></div>
     </div>
     <!-- Sakura SVG Definitions -->
 <svg class="sakura-defs" xmlns="http://www.w3.org/2000/svg">
@@ -411,7 +408,9 @@
             const box = document.getElementById('petals');
             if (!box) return;
             const clrs = ['#ffc4e8', '#ffe6f6', '#ff86cf', '#ffb0e2', '#ff5cc0', '#f0b8e8'];
-            const N = window.innerWidth < 600 ? 12 : 24;
+            // Petal count: phone par 12 animated layers bahut mehnga tha
+            // (har petal alag composited layer ban jaata hai) — 6 kiya.
+            const N = window.innerWidth < 600 ? 6 : 24;
             for (let i = 0; i < N; i++) {
                 const p = document.createElement('div');
                 p.className = 'petal';
@@ -426,52 +425,142 @@
             }
         })();
 
-// ===== CONFETTI ENGINE =====
-        window.launchConfetti = function () {
-            const c = document.getElementById('fxCanvas');
-            if (!c) return;
-            const ctx = c.getContext('2d');
-            c.width = window.innerWidth;
-            c.height = window.innerHeight;
-            const colors = ['#818cf8', '#fbbf24', '#34d399', '#f472b6', '#60a5fa', '#ffffff'];
-            const parts = [];
-            for (let i = 0; i < 140; i++) {
-                parts.push({
-                    x: c.width / 2 + (Math.random() - 0.5) * 260,
-                    y: c.height * 0.32,
-                    vx: (Math.random() - 0.5) * 16,
-                    vy: Math.random() * -13 - 4,
-                    s: Math.random() * 8 + 4,
-                    c: colors[(Math.random() * colors.length) | 0],
-                    r: Math.random() * Math.PI,
-                    vr: (Math.random() - 0.5) * 0.35,
-                    life: 1
-                });
+// ===== CONFETTI ENGINE v2 =====
+// Purana version: ek hi flat burst, sab same rect, gravity 0.35,
+// aur har launch par canvas.width resete (realloc + flicker).
+//
+// Naya version:
+//   - 2-stage burst (core flash + wide spread + side cannons)
+//   - asli physics: gravity + air drag + horizontal flutter
+//   - 3 shape types: ribbon (spins), disc, square
+//   - devicePixelRatio scaling — phone par crisp, blur nahi
+//   - canvas size sirf resize par set, har launch par nahi
+//   - reduced-motion par chalti nahi
+window.__confettiRAF = null;
+
+window.launchConfetti = function () {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const cv = document.getElementById('fxCanvas');
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    if (!ctx) return;
+
+    // ---- size: sirf jab badle ----
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const W = window.innerWidth, H = window.innerHeight;
+    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) {
+        cv.width = Math.round(W * dpr);
+        cv.height = Math.round(H * dpr);
+        cv.style.width = W + 'px';
+        cv.style.height = H + 'px';
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // pehle se chal rahi ho to usse rok do (double burst na ho)
+    if (window.__confettiRAF) cancelAnimationFrame(window.__confettiRAF);
+
+    const COLORS = ['#818cf8', '#a78bfa', '#fbbf24', '#34d399', '#f472b6', '#60a5fa', '#ffffff'];
+    const cx = W / 2, cy = H * 0.34;
+    const small = W < 600;
+    const COUNT = small ? 90 : 170;
+
+    const parts = [];
+    const rnd = (a, b) => a + Math.random() * (b - a);
+
+    const add = (x, y, vx, vy, size) => {
+        parts.push({
+            x: x, y: y, vx: vx, vy: vy,
+            s: size,
+            w: size * rnd(0.5, 1.4),          // width  (ribbon stretch)
+            h: size * rnd(0.35, 0.8),         // height
+            c: COLORS[(Math.random() * COLORS.length) | 0],
+            r: Math.random() * Math.PI * 2,
+            vr: rnd(-0.28, 0.28),             // spin
+            fl: rnd(0.4, 1.6),                // flutter phase
+            fs: rnd(0.06, 0.16),              // flutter strength
+            life: 1,
+            decay: rnd(0.0055, 0.009),
+            type: Math.random() < 0.62 ? 0 : (Math.random() < 0.7 ? 1 : 2) // 0 ribbon, 1 disc, 2 square
+        });
+    };
+
+    // 1) core burst — tight, fast, upward
+    for (let i = 0; i < COUNT * 0.5; i++) {
+        const a = rnd(-Math.PI * 0.92, -Math.PI * 0.08);   // fan upwards
+        const sp = rnd(9, 19);
+        add(cx + rnd(-60, 60), cy, Math.cos(a) * sp, Math.sin(a) * sp, rnd(5, 10));
+    }
+    // 2) wide spread — slower, drifts sideways
+    for (let i = 0; i < COUNT * 0.32; i++) {
+        add(cx + rnd(-W * 0.42, W * 0.42), cy + rnd(-30, 60), rnd(-6.5, 6.5), rnd(-11, -2), rnd(4, 9));
+    }
+    // 3) side cannons — neeche se upar, dono taraf
+    if (!small) {
+        for (let i = 0; i < COUNT * 0.18; i++) {
+            const fromLeft = Math.random() < 0.5;
+            const x = fromLeft ? W * 0.04 : W * 0.96;
+            add(x, H * 0.88, (fromLeft ? 1 : -1) * rnd(7, 14), rnd(-16, -9), rnd(5, 9));
+        }
+    }
+
+    const GRAV = 0.30;      // gravity
+    const DRAG = 0.985;     // hawa ka resistance
+
+    function frame() {
+        ctx.clearRect(0, 0, W, H);
+        let alive = false;
+
+        for (let i = 0; i < parts.length; i++) {
+            const p = parts[i];
+            if (p.life <= 0) continue;
+
+            // physics
+            p.vy += GRAV;
+            p.vx *= DRAG;
+            p.vy *= DRAG;
+            p.fl += 0.08;
+            p.x += p.vx + Math.sin(p.fl) * p.fs;   // flutter
+            p.y += p.vy;
+            p.r += p.vr;
+            p.life -= p.decay;
+
+            const off = p.y > H + 80;
+            if (p.life <= 0 || off) { p.life = 0; continue; }
+            alive = true;
+
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, Math.min(1, p.life * 1.3));
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.r);
+            ctx.fillStyle = p.c;
+
+            if (p.type === 0) {
+                // ribbon — stretch aur rotate = 3D flip jaisa
+                const flip = Math.abs(Math.cos(p.fl));      // 0..1 "side view"
+                ctx.fillRect(-p.w / 2, -p.h / 2, p.w * (0.25 + flip * 0.75), p.h);
+            } else if (p.type === 1) {
+                // disc
+                ctx.beginPath();
+                ctx.ellipse(0, 0, p.s * 0.45, p.s * 0.45 * Math.abs(Math.cos(p.fl)), 0, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // square
+                ctx.fillRect(-p.s / 2, -p.s / 2, p.s * 0.8, p.s * 0.8);
             }
-            (function tick() {
-                ctx.clearRect(0, 0, c.width, c.height);
-                let alive = false;
-                parts.forEach(p => {
-                    p.vy += 0.35;
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.r += p.vr;
-                    p.life -= 0.008;
-                    if (p.life > 0 && p.y < c.height + 60) {
-                        alive = true;
-                        ctx.save();
-                        ctx.globalAlpha = Math.max(p.life, 0);
-                        ctx.translate(p.x, p.y);
-                        ctx.rotate(p.r);
-                        ctx.fillStyle = p.c;
-                        ctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.6);
-                        ctx.restore();
-                    }
-                });
-                if (alive) requestAnimationFrame(tick);
-                else ctx.clearRect(0, 0, c.width, c.height);
-            })();
-        };
+            ctx.restore();
+        }
+
+        if (alive) {
+            window.__confettiRAF = requestAnimationFrame(frame);
+        } else {
+            ctx.clearRect(0, 0, W, H);
+            window.__confettiRAF = null;
+        }
+    }
+
+    window.__confettiRAF = requestAnimationFrame(frame);
+};
 
         // ===== BUTTON RIPPLE =====
         document.addEventListener('click', function (e) {
@@ -618,35 +707,121 @@ window.buildSkeleton = function () {
     // footer skeleton ko flex column banana padta hai
     const f = footer.querySelector('.skeleton');
     if (f) { f.classList.add('sk-footer'); f.style.height = 'auto'; }
+
+    // progress bar — col-main ke neeche (jaha sabse zyada loading hoti hai)
+    const bar = document.createElement('div');
+    bar.className = 'skeleton sk-progress';
+    bar.innerHTML =
+        '<div class="sk-block sk-progress-track">' +
+        '<span class="sk-progress-fill" id="skBar"></span>' +
+        '</div>' +
+        '<div class="sk-progress-text" id="skText">Connecting to servers</div>';
+    main.appendChild(bar);
+    window.__skNodes.push(bar);
+};
+
+// ---- progress feedback ----
+window.__skProgress = 0;
+window.__skTick = null;
+window.__skMessages = [
+    'Connecting to servers',
+    'Loading key database',
+    'Preparing your dashboard',
+    'Almost ready'
+];
+window.__skMsgIdx = 0;
+
+window.startProgress = function () {
+    const bar = document.getElementById('skBar');
+    const txt = document.getElementById('skText');
+    if (!bar) return;
+    // 90% tak smoothly, chalta rahega — real ready hone par 100%
+    window.__skTick = setInterval(function () {
+        if (window.__skProgress >= 90) return;
+        window.__skProgress += Math.max(0.4, (90 - window.__skProgress) * 0.045);
+        bar.style.width = window.__skProgress + '%';
+        const want = Math.min(3, Math.floor(window.__skProgress / 26));
+        if (want > window.__skMsgIdx && txt) {
+            window.__skMsgIdx = want;
+            txt.textContent = window.__skMessages[want];
+        }
+    }, 90);
 };
 
 window.hideSkeleton = function () {
-    // Idempotent — Firebase event, load event aur timeout teeno call
-    // kar sakte hain, sirf pehli baar kaam karega. Scroll se kabhi
-    // dobara call nahi hota.
+    // Idempotent — Firebase event aur safety timeout dono call kar
+    // sakte hain, sirf pehli baar kaam karega.
     if (window.__skHidden) return;
     window.__skHidden = true;
 
-    window.__skNodes.forEach(n => n.remove());
-    window.__skNodes = [];
-    window.__skBuilt = false;
-    document.body.classList.remove('is-loading');
-    // container ke fadeInUp animations dobara chalein (ab asli content dikhega)
-    document.querySelectorAll('.container > *').forEach(el => {
-        el.style.animation = 'none';
-        void el.offsetWidth;
-        el.style.animation = '';
-    });
+    if (window.__skTick) { clearInterval(window.__skTick); window.__skTick = null; }
+    const bar = document.getElementById('skBar');
+    if (bar) bar.style.width = '100%';
+
+    // ek chhota rukaav — dashboard ke keys paint hone do, phir
+    // smooth fade out. Page "adhoora" kabhi nahi dikhega.
+    setTimeout(function () {
+        window.__skNodes.forEach(function (n) { n.remove(); });
+        window.__skNodes = [];
+        window.__skBuilt = false;
+        document.body.classList.remove('is-loading');
+        var sc = document.getElementById('skCurtain');
+        if (sc) {
+            sc.classList.add('is-done');
+            setTimeout(function () { sc.remove(); }, 500);
+        }
+        // container ke fadeInUp animations replay
+        document.querySelectorAll('.container > *').forEach(function (el) {
+            el.style.animation = 'none';
+            void el.offsetWidth;
+            el.style.animation = '';
+        });
+    }, 380);
 };
 
 // build turant (script body ke end par hai, DOM ready hai)
 window.buildSkeleton();
+window.startProgress();
 
-// Firebase ready hote hi — content render ho chuka hota hai
+// curtain: skeleton ke peeche page ka background na dikhe,
+// aur fade-out ke dauran smooth cover kare
+(function () {
+    var c = document.createElement('div');
+    c.id = 'skCurtain';
+    c.setAttribute('aria-hidden', 'true');
+    c.style.cssText =
+        'position:fixed;inset:0;z-index:1;pointer-events:none;' +
+        'transition:opacity .45s ease,visibility .45s ease;' +
+        'background:linear-gradient(160deg,#04040d 0%,#0a0a1f 55%,#150a24 100%);';
+    var isLight = document.documentElement.classList.contains('light-theme') ||
+                  document.body.classList.contains('light-theme');
+    if (isLight) c.style.background =
+        'linear-gradient(125deg,#ffe8c2 0%,#ffdde9 42%,#cbe7ff 100%)';
+    document.body.appendChild(c);
+
+    // light theme toggle ho to curtain bhi update ho
+    window.addEventListener('load', function () {
+        var ic = document.querySelector('#themeToggle i');
+        if (!ic) return;
+        var obs = new MutationObserver(function () {
+            var light = document.body.classList.contains('light-theme');
+            c.style.background = light
+                ? 'linear-gradient(125deg,#ffe8c2 0%,#ffdde9 42%,#cbe7ff 100%)'
+                : 'linear-gradient(160deg,#04040d 0%,#0a0a1f 55%,#150a24 100%)';
+        });
+        obs.observe(ic, { attributes: true, attributeFilter: ['class'] });
+    });
+})();
+
+// SIRF tab hide karo jab Firebase ne sach me content render kiya.
+// PEHLE `load` event par 600ms baad hide kar deta tha — jo Firebase
+// ready hone se PEHLE ho jata tha, isliye user ko adhoora page
+// dikhta tha (spinner, khali cards) aur kuch der baad sahi hota tha.
+// Ab load event se koi kaam nahi — sirf ready ya safety timeout.
 window.addEventListener('bunny:ready', window.hideSkeleton);
-window.addEventListener('load', function () { setTimeout(window.hideSkeleton, 600); });
-// safety net — kabhi stuck na rahe
-setTimeout(window.hideSkeleton, 7000);
+// safety net — agar Firebase kabhi na aaye to 14s baad khul jayega
+// (stuck rehne se behtar hai)
+setTimeout(window.hideSkeleton, 14000);
 
 // ===== OFFLINE CACHE =====
 // Pehli visit par poori page cache ho jati hai. Agli visit par
