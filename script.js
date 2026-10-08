@@ -175,6 +175,8 @@ function showAntiSpamUI(timeLeftMs) {
     document.getElementById('genDesc').innerText = `Limit Reached (${sysSettings.maxKeysLimit} Keys / ${sysSettings.cooldownHours} Hours). Refresh in ${hours}h ${minutes}m ${seconds}s.`;
     document.getElementById('copyBtn').style.display = 'none';
     document.getElementById('newKeyValue').style.display = 'none';
+    const genCheck = document.getElementById('genCheck');
+    if (genCheck) genCheck.style.display = 'none';
     updateLimitsDisplay();
 }
 
@@ -190,7 +192,7 @@ async function createAndRegisterKey() {
     const defaultDuration = sysSettings.defaultKeyDuration || 24;
     const defaultTier = sysSettings.defaultKeyTier || 'normal';
     const isVip = defaultTier === 'vip';
-    const prefix = isVip ? 'VIP-' : 'Bunny-';
+    const prefix = isVip ? 'VIP-' : 'BUNNY-';
     const newKey = prefix + generateShortKey();
     
     let duration = sysSettings.defaultKeyLifetime ? 99999 : defaultDuration;
@@ -255,6 +257,8 @@ async function createAndRegisterKey() {
         document.getElementById('genLoader').style.display = 'none';
         document.getElementById('genResult').style.display = 'block';
         document.getElementById('shareBtn').style.display = 'inline-flex';
+        if (window.launchConfetti) window.launchConfetti();
+        if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
         setupRealtimeSync(); 
     } catch (err) {
         document.getElementById('genLoader').innerHTML = '<p style="color:#ef4444;">Server error! Kripya baad me try karein.</p>';
@@ -429,6 +433,7 @@ function setupOfflineDetection() {
 // ===== COPY (with fallback) =====
 window.copyText = function(text) {
     if (text.includes('XXXX')) return;
+    if (navigator.vibrate) navigator.vibrate(30);
     navigator.clipboard.writeText(text).then(() => {
         showToast();
     }).catch(() => {
