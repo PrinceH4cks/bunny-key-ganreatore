@@ -1093,7 +1093,7 @@ document.getElementById('generateBtn')?.addEventListener('click', async function
         dur = t === 'days' ? v * 24 : v;
     }
     
-    const newKey = (isVip ? 'VIP-' : 'MC-') + randomStr();
+    const newKey = (isVip ? 'VIP-' : 'Bunny-') + randomStr();
     const kData = { createdAt: serverTimestamp(), durationHours: dur, isUsed: false, boundDeviceId: "NONE", type: isVip ? "VIP" : "Normal" };
     if (note) kData.note = note;
 
